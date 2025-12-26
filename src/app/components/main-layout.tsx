@@ -87,8 +87,8 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
         <SidebarInset>
           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
             <SidebarTrigger className="md:hidden" />
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">
+            <div className="flex-1 overflow-hidden">
+              <h1 className="text-lg font-semibold truncate">
                 {navItems.find((item) => pathname.startsWith(item.href))?.label || 'KingServ PWA'}
               </h1>
             </div>
