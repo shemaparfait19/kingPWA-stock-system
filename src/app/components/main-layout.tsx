@@ -1,5 +1,6 @@
 'use client';
 import type { FC, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -37,6 +38,13 @@ const navItems = [
 
 export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
   const pathname = usePathname();
+  const [headerTitle, setHeaderTitle] = useState('KingServ PWA');
+
+  useEffect(() => {
+    const currentNavItem = navItems.find((item) => pathname.startsWith(item.href));
+    setHeaderTitle(currentNavItem?.label || 'KingServ PWA');
+  }, [pathname]);
+
 
   return (
     <SidebarProvider>
@@ -89,7 +97,7 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
             <SidebarTrigger className="md:hidden" />
             <div className="flex-1 overflow-hidden">
               <h1 className="text-lg font-semibold truncate">
-                {navItems.find((item) => pathname.startsWith(item.href))?.label || 'KingServ PWA'}
+                {headerTitle}
               </h1>
             </div>
             <UserNav />
