@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      const totalValue = items.reduce((sum, item) => sum + (item.costPrice * item.quantity), 0);
+      const totalValue = items.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0);
       const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
       const lowStockItems = items.filter(item => item.quantity <= item.reorderLevel).length;
 
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
         details: items.map(item => ({
           date: new Date().toISOString().split('T')[0],
           description: `${item.name} - ${item.quantity} in stock`,
-          amount: item.costPrice * item.quantity,
+          amount: item.unitCost * item.quantity,
         })),
       };
     }
