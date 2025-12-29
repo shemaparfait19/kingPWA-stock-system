@@ -1,24 +1,50 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Clock, CreditCard, Package } from 'lucide-react';
-
-const formatCurrency = (amount: number) => {
-  return `RWF ${new Intl.NumberFormat('en-US').format(amount)}`;
-};
+import { formatCurrency } from '@/lib/utils';
 
 export function AttentionNeeded() {
+  const [stats, setStats] = useState({
+    lowStockItems: 0,
+    overdueRepairs: 0,
+    unpaidInvoices: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/dashboard/stats');
+        const data = await response.json();
+        setStats({
+          lowStockItems: data.lowStockItems,
+          overdueRepairs: data.overdueRepairs,
+          unpaidInvoices: data.unpaidInvoices,
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const alerts = [
     {
-      text: '3 items low on stock',
+      text: `${stats.lowStockItems} items low on stock`,
       icon: Package,
       className: 'text-yellow-600',
     },
     {
-      text: '2 repairs overdue',
+      text: `${stats.overdueRepairs} repairs overdue`,
       icon: Clock,
       className: 'text-red-600',
     },
     {
-      text: `${formatCurrency(90000)} in unpaid invoices`,
+      text: `${formatCurrency(stats.unpaidInvoices)} in unpaid invoices`,
       icon: CreditCard,
       className: 'text-blue-600',
     },

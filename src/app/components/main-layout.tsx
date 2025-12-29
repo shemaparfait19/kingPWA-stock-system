@@ -24,8 +24,10 @@ import {
   BarChart3,
   Settings,
   Crown,
+  Calendar,
 } from 'lucide-react';
 import { UserNav } from './user-nav';
+import { useAuth } from './auth-provider';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -33,18 +35,29 @@ const navItems = [
   { href: '/inventory', label: 'Inventory', icon: Boxes },
   { href: '/customers', label: 'Customers', icon: Users },
   { href: '/sales', label: 'Sales (POS)', icon: ShoppingCart },
+  { href: '/appointments', label: 'Appointments', icon: Calendar },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
 ];
 
 export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const [headerTitle, setHeaderTitle] = useState('KingServ PWA');
+  const { user, loading } = useAuth();
+  const [headerTitle, setHeaderTitle] = useState('King Service Tech');
 
   useEffect(() => {
     const currentNavItem = navItems.find((item) => pathname.startsWith(item.href));
-    setHeaderTitle(currentNavItem?.label || 'KingServ PWA');
+    setHeaderTitle(currentNavItem?.label || 'King Service Tech');
   }, [pathname]);
 
+  // Don't show sidebar on login page
+  if (pathname === '/login' || loading) {
+    return <>{children}</>;
+  }
+
+  // If not logged in and not on login page, show nothing (redirect will happen)
+  if (!user) {
+    return null;
+  }
 
   return (
     <SidebarProvider>
