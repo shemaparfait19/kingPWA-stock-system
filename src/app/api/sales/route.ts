@@ -85,9 +85,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { items, customerId, paymentMethod, discount, amountPaid } = body;
 
-    // Default userId from session if available
-    const userId = session.user.id;
-
     // Calculate totals
     const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
     const tax = 0; // Assuming 0 tax for now or calculate if needed
