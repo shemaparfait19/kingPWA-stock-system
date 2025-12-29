@@ -76,8 +76,8 @@ export async function POST(request: NextRequest) {
         email,
         username,
         phone: phone || null,
-        role,
-        password: hashedPassword,
+        role: role === 'admin' ? 'owner' : role, // Map admin to owner if needed, though frontend should send correct value
+        passwordHash: hashedPassword,
         active: true,
       },
       select: {

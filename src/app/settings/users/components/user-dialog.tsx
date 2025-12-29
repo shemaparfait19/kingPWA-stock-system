@@ -148,7 +148,7 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="owner">Admin (Owner)</SelectItem>
                 <SelectItem value="manager">Manager</SelectItem>
                 <SelectItem value="technician">Technician</SelectItem>
                 <SelectItem value="sales">Sales</SelectItem>
