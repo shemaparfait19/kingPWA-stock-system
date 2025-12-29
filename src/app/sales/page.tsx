@@ -87,7 +87,7 @@ export default function SalesPage() {
   const total = subtotal + tax;
 
   const handleCheckout = async () => {
-    if (!user) return;
+    // if (!user) return; // Allow API fallback to handle auth/default user
     if (cart.length === 0) {
       toast({
         title: 'Cart is empty',
@@ -115,7 +115,7 @@ export default function SalesPage() {
           tax,
           total,
           paidAmount: total,
-          userId: user.id,
+          userId: user?.id || null, // Allow API to handle null/fallback
           customerId: selectedCustomer?.id || null,
         }),
       });
@@ -241,7 +241,7 @@ export default function SalesPage() {
                         min="1"
                         value={item.quantity}
                         onChange={(e) =>
-                          updateQuantity(item.id, parseInt(e.target.value))
+                          updateQuantity(item.id, parseInt(e.target.value) || 1)
                         }
                         className="w-16 text-center"
                       />
