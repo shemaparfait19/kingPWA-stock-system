@@ -51,7 +51,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
+    console.log('Sales POST Session:', JSON.stringify(session, null, 2));
+
     if (!session || !session.user) {
+      console.log('Unauthorized access attempt');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
