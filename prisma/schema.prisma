@@ -209,15 +209,16 @@ enum RepairPriority {
 model RepairPartUsed {
   id           String   @id @default(cuid())
   repairJobId  String
-  itemId       String
+  itemId       String?
+  customName   String?
   quantity     Int
   unitCost     Float
   totalCost    Float
   createdAt    DateTime @default(now())
   
   // Relations
-  repairJob RepairJob     @relation(fields: [repairJobId], references: [id])
-  item      InventoryItem @relation(fields: [itemId], references: [id])
+  repairJob RepairJob      @relation(fields: [repairJobId], references: [id])
+  item      InventoryItem? @relation(fields: [itemId], references: [id])
   
   @@map("repair_parts_used")
 }

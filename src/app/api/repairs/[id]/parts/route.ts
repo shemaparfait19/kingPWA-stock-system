@@ -8,67 +8,94 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { itemId, quantity } = body;
+    const { itemId, quantity, name, unitCost } = body;
 
-    if (!itemId || !quantity) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
+    // Validation
+    if (!quantity) {
+       return NextResponse.json(
+        { error: 'Quantity is required' },
         { status: 400 }
       );
     }
 
-    // Get item details
-    const item = await prisma.inventoryItem.findUnique({
-      where: { id: itemId },
-    });
-
-    if (!item) {
+    if (!itemId && !name) {
       return NextResponse.json(
-        { error: 'Item not found' },
-        { status: 404 }
+        { error: 'Either select a part or provide a name' },
+        { status: 400 }
       );
     }
 
-    // Check stock availability
-    if (item.quantity < quantity) {
-      return NextResponse.json(
-        { error: `Insufficient stock. Only ${item.quantity} available` },
-        { status: 400 }
-      );
+    let finalUnitCost = unitCost;
+    let finalItemId = itemId;
+
+    // Logic for Stock Item
+    if (itemId) {
+        // Get item details
+        const item = await prisma.inventoryItem.findUnique({
+        where: { id: itemId },
+        });
+
+        if (!item) {
+        return NextResponse.json(
+            { error: 'Item not found' },
+            { status: 404 }
+        );
+        }
+
+        // Check stock availability
+        if (item.quantity < quantity) {
+        return NextResponse.json(
+            { error: `Insufficient stock. Only ${item.quantity} available` },
+            { status: 400 }
+        );
+        }
+
+        finalUnitCost = item.sellingPrice;
+        
+        // Deduct from inventory
+        await prisma.inventoryItem.update({
+        where: { id: itemId },
+        data: {
+            quantity: {
+            decrement: quantity,
+            },
+        },
+        });
+
+        // Create inventory transaction
+        await prisma.inventoryTransaction.create({
+        data: {
+            itemId,
+            quantity: -quantity,
+            type: 'OUT',
+            reason: 'repair_use',
+            notes: `Used in repair job ${params.id}`,
+            userId: 'system', // Should be actual user ID
+        },
+        });
+    } else {
+        // Logic for Custom/External Item
+        finalItemId = null;
+        if (!finalUnitCost) {
+             return NextResponse.json(
+                { error: 'Unit cost is required for custom parts' },
+                { status: 400 }
+            );           
+        }
     }
 
     // Create parts used record
     const partUsed = await prisma.repairPart.create({
       data: {
         repairJobId: params.id,
-        itemId,
+        itemId: finalItemId,
+        customName: name, 
         quantity,
-        unitCost: item.sellingPrice,
+        unitCost: Number(finalUnitCost),
+        totalCost: Number(finalUnitCost) * Number(quantity),
       },
       include: {
         item: true,
-      },
-    });
-
-    // Deduct from inventory
-    await prisma.inventoryItem.update({
-      where: { id: itemId },
-      data: {
-        quantity: {
-          decrement: quantity,
-        },
-      },
-    });
-
-    // Create inventory transaction
-    await prisma.inventoryTransaction.create({
-      data: {
-        itemId,
-        quantity: -quantity,
-        type: 'OUT',
-        reason: 'repair_use',
-        notes: `Used in repair job ${params.id}`,
-        userId: 'system', // Should be actual user ID
       },
     });
 

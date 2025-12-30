@@ -85,19 +85,58 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { items, customerId, paymentMethod, discount, amountPaid } = body;
 
+    // Validate request body
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: 'Invalid request: No items provided' },
+        { status: 400 }
+      );
+    }
+
+    // Validate items structure
+    for (const item of items) {
+      if (!item.id || !item.quantity || (!item.price && !item.sellingPrice)) {
+         return NextResponse.json(
+          { error: `Invalid item data: ${JSON.stringify(item)}` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Calculate totals
-    const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+    const subtotal = items.reduce((sum: number, item: any) => {
+      const price = item.price || item.sellingPrice || 0;
+      return sum + (price * item.quantity);
+    }, 0);
+    
     const tax = 0; // Assuming 0 tax for now or calculate if needed
     const total = subtotal + tax - (discount || 0);
 
+    console.log('Processing sale:', { subtotal, total, itemCount: items.length });
+
     // Create invoice with transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create Invoice
+      // 1. Check stock for all items first
+      for (const item of items) {
+        const dbItem = await tx.inventoryItem.findUnique({
+          where: { id: item.id }
+        });
+        
+        if (!dbItem) {
+          throw new Error(`Item not found: ${item.id}`);
+        }
+        
+        if (dbItem.quantity < item.quantity) {
+          throw new Error(`Insufficient stock for ${dbItem.name}. Available: ${dbItem.quantity}, Requested: ${item.quantity}`);
+        }
+      }
+
+      // 2. Create Invoice
       const invoice = await tx.salesInvoice.create({
         data: {
           invoiceNumber: `INV-${Date.now()}`,
           customerId: customerId || null,
-          userId: userId,
+          userId: userId!, // We checked strict userId above
           subtotal,
           tax,
           discount: discount || 0,
@@ -109,8 +148,8 @@ export async function POST(request: NextRequest) {
             create: items.map((item: any) => ({
               itemId: item.id,
               quantity: item.quantity,
-              unitPrice: item.price,
-              total: item.price * item.quantity,
+              unitPrice: item.price || item.sellingPrice,
+              total: (item.price || item.sellingPrice) * item.quantity,
             })),
           },
         },
@@ -124,7 +163,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      // 2. Update Inventory
+      // 3. Update Inventory
       for (const item of items) {
         await tx.inventoryItem.update({
           where: { id: item.id },
@@ -143,8 +182,8 @@ export async function POST(request: NextRequest) {
              quantity: item.quantity,
              reason: 'sale',
              referenceId: invoice.id,
-             userId: userId,
-          }
+             userId: userId!,
+           }
         });
       }
 
@@ -154,6 +193,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error: any) {
     console.error('Error processing sale:', error);
+    // Return the actual error message if possible to help debugging
     return NextResponse.json(
       { error: error.message || 'Failed to process sale' },
       { status: 500 }
