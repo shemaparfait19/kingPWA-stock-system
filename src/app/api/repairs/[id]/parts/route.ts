@@ -85,7 +85,7 @@ export async function POST(
     }
 
     // Create parts used record
-    const partUsed = await prisma.repairPart.create({
+    const partUsed = await prisma.repairPartUsed.create({
       data: {
         repairJobId: params.id,
         itemId: finalItemId,
