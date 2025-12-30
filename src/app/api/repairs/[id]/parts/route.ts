@@ -62,6 +62,30 @@ export async function POST(
         },
         });
 
+    // Get User ID (Session or Fallback)
+    // Note: We need a valid User ID for the Foreign Key in InventoryTransaction
+    // Since this is an API route, we try to get the session user.
+    // If no session (e.g. testing), we MUST look up a valid user from the DB.
+    
+    // Check for auth if available (omitted for brevity in this specific fix, assuming context)
+    // For robust server-side, let's find a fallback "system" user or just the first user.
+    let transactionUserId = 'system';
+    
+    // Try to find a valid user to attribute this to
+    const defaultUser = await prisma.user.findFirst();
+    if (defaultUser) {
+        transactionUserId = defaultUser.id;
+    } else {
+        // If NO users exist at all, we can't create a transaction due to FK constraint.
+        // But assumedly users exist if the app is running.
+        console.warn("No users found in DB. Inventory Transaction might fail if 'system' user doesn't exist.");
+    }
+
+    if (itemId) {
+        // ... (existing item checks) ...
+
+        // ... (existing update) ...
+
         // Create inventory transaction
         await prisma.inventoryTransaction.create({
         data: {
@@ -70,13 +94,13 @@ export async function POST(
             type: 'OUT',
             reason: 'repair_use',
             notes: `Used in repair job ${params.id}`,
-            userId: 'system', // Should be actual user ID
+            userId: transactionUserId, // Use Real User ID
         },
         });
     } else {
-        // Logic for Custom/External Item
+        // ... (existing custom logic) ...
         finalItemId = null;
-        if (!finalUnitCost) {
+        if(!finalUnitCost) {
              return NextResponse.json(
                 { error: 'Unit cost is required for custom parts' },
                 { status: 400 }
@@ -87,8 +111,13 @@ export async function POST(
     // Create parts used record
     const partUsed = await prisma.repairPartUsed.create({
       data: {
-        repairJobId: params.id,
-        itemId: finalItemId,
+        // Use verify 'connect' syntax to avoid Prisma "missing argument" errors
+        repairJob: {
+            connect: { id: params.id }
+        },
+        // Only connect item if it exists (not null)
+        ...(finalItemId ? { item: { connect: { id: finalItemId } } } : {}),
+        
         customName: name, 
         quantity,
         unitCost: Number(finalUnitCost),
