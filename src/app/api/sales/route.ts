@@ -95,7 +95,12 @@ export async function POST(request: NextRequest) {
 
     // Validate items structure
     for (const item of items) {
-      if (!item.id || !item.quantity || (!item.price && !item.sellingPrice)) {
+      // Normalize fields to handle different payload formats (frontend sends itemId/unitPrice)
+      const id = item.itemId || item.id;
+      const quantity = item.quantity;
+      const price = item.unitPrice || item.price || item.sellingPrice;
+
+      if (!id || !quantity || !price) {
          return NextResponse.json(
           { error: `Invalid item data: ${JSON.stringify(item)}` },
           { status: 400 }
@@ -105,11 +110,11 @@ export async function POST(request: NextRequest) {
 
     // Calculate totals
     const subtotal = items.reduce((sum: number, item: any) => {
-      const price = item.price || item.sellingPrice || 0;
+      const price = item.unitPrice || item.price || item.sellingPrice || 0;
       return sum + (price * item.quantity);
     }, 0);
     
-    const tax = 0; // Assuming 0 tax for now or calculate if needed
+    const tax = 0;
     const total = subtotal + tax - (discount || 0);
 
     console.log('Processing sale:', { subtotal, total, itemCount: items.length });
@@ -118,16 +123,19 @@ export async function POST(request: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // 1. Check stock for all items first
       for (const item of items) {
+        const id = item.itemId || item.id;
+        const quantity = item.quantity;
+
         const dbItem = await tx.inventoryItem.findUnique({
-          where: { id: item.id }
+          where: { id }
         });
         
         if (!dbItem) {
-          throw new Error(`Item not found: ${item.id}`);
+          throw new Error(`Item not found: ${id}`);
         }
         
-        if (dbItem.quantity < item.quantity) {
-          throw new Error(`Insufficient stock for ${dbItem.name}. Available: ${dbItem.quantity}, Requested: ${item.quantity}`);
+        if (dbItem.quantity < quantity) {
+          throw new Error(`Insufficient stock for ${dbItem.name}. Available: ${dbItem.quantity}, Requested: ${quantity}`);
         }
       }
 
@@ -136,20 +144,20 @@ export async function POST(request: NextRequest) {
         data: {
           invoiceNumber: `INV-${Date.now()}`,
           customerId: customerId || null,
-          userId: userId!, // We checked strict userId above
+          userId: userId!,
           subtotal,
           tax,
           discount: discount || 0,
           total,
-          paidAmount: amountPaid || total, // Assume full payment if not specified
+          paidAmount: amountPaid || total,
           paymentMethod: paymentMethod || 'cash',
           paymentStatus: (amountPaid || total) >= total ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid'),
           items: {
             create: items.map((item: any) => ({
-              itemId: item.id,
+              itemId: item.itemId || item.id,
               quantity: item.quantity,
-              unitPrice: item.price || item.sellingPrice,
-              total: (item.price || item.sellingPrice) * item.quantity,
+              unitPrice: item.unitPrice || item.price || item.sellingPrice,
+              total: (item.unitPrice || item.price || item.sellingPrice) * item.quantity,
             })),
           },
         },
@@ -165,11 +173,14 @@ export async function POST(request: NextRequest) {
 
       // 3. Update Inventory
       for (const item of items) {
+        const id = item.itemId || item.id;
+        const quantity = item.quantity;
+
         await tx.inventoryItem.update({
-          where: { id: item.id },
+          where: { id },
           data: {
             quantity: {
-              decrement: item.quantity
+              decrement: quantity
             }
           }
         });
@@ -177,9 +188,9 @@ export async function POST(request: NextRequest) {
         // Record transaction
         await tx.inventoryTransaction.create({
           data: {
-             itemId: item.id,
+             itemId: id,
              type: 'OUT',
-             quantity: item.quantity,
+             quantity: quantity,
              reason: 'sale',
              referenceId: invoice.id,
              userId: userId!,
