@@ -122,7 +122,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
                     <TableHead>Reorder Level</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredItems.map((item) => {
