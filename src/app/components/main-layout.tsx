@@ -61,7 +61,10 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
     return true; 
   });
 
-  // ... (rest of the component)
+  useEffect(() => {
+    const currentNavItem = navItems.find((item) => pathname.startsWith(item.href));
+    setHeaderTitle(currentNavItem?.label || 'King Service Tech');
+  }, [pathname]);
 
   return (
     <SidebarProvider>
@@ -113,7 +116,19 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
         </Sidebar>
 
         <SidebarInset>
-          {/* ... */}
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
+            <SidebarTrigger className="md:hidden" />
+            <div className="flex-1 overflow-hidden">
+              <h1 className="text-lg font-semibold truncate">
+                {headerTitle}
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <NotificationsDropdown />
+              <UserNav />
+            </div>
+          </header>
+          <main className="flex-1 p-4 md:p-6">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
