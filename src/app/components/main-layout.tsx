@@ -1,11 +1,50 @@
-// ... imports
+'use client';
+
+import type { FC, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarTrigger,
+  SidebarInset,
+} from '@/components/ui/sidebar';
+import {
+  LayoutDashboard,
+  Wrench,
+  Boxes,
+  Users,
+  ShoppingCart,
+  BarChart3,
+  Settings,
+  Crown,
+  Calendar,
+} from 'lucide-react';
+import { UserNav } from './user-nav';
+import { useAuth } from './auth-provider';
+import { NotificationsDropdown } from './notifications-dropdown';
 import {
   hasPermission,
   canViewReports,
   canManageUsers
 } from '@/lib/permissions';
 
-// ... (navItems definition)
+const navItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/repairs', label: 'Repairs', icon: Wrench },
+  { href: '/inventory', label: 'Inventory', icon: Boxes },
+  { href: '/customers', label: 'Customers', icon: Users },
+  { href: '/sales', label: 'Sales (POS)', icon: ShoppingCart },
+  { href: '/appointments', label: 'Appointments', icon: Calendar },
+  { href: '/reports', label: 'Reports', icon: BarChart3 },
+];
 
 export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
   const pathname = usePathname();
