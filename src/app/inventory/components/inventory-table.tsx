@@ -13,11 +13,13 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Edit, Package } from 'lucide-react';
+import { Search, Edit, Package, Trash2 } from 'lucide-react';
 import { formatCurrency, getStockLevel } from '@/lib/utils';
 import type { InventoryType } from '@/lib/types';
 import { ItemDialog } from './item-dialog';
 import { StockAdjustmentDialog } from './stock-adjustment-dialog';
+import { useAuth } from '@/app/components/auth-provider';
+import { canDeleteInventory, hasPermission } from '@/lib/permissions';
 
 interface InventoryTableProps {
   type: InventoryType;
@@ -30,6 +32,10 @@ export function InventoryTable({ type }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<any | null>(null);
   const [adjustItem, setAdjustItem] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  
+  const showCostPrice = hasPermission(user?.role, 'view_cost_price');
+  const canDelete = canDeleteInventory(user?.role);
 
   useEffect(() => {
     fetchItems();
@@ -111,12 +117,12 @@ export function InventoryTable({ type }: InventoryTableProps) {
                     <TableHead>Name</TableHead>
                     <TableHead>SKU</TableHead>
                     <TableHead>Stock Level</TableHead>
-                    <TableHead>Unit Cost</TableHead>
+                    {showCostPrice && <TableHead>Unit Cost</TableHead>}
                     <TableHead>Selling Price</TableHead>
                     <TableHead>Reorder Level</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
+                  </TableRow>>
                 </TableHeader>
                 <TableBody>
                   {filteredItems.map((item) => {
@@ -136,7 +142,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell>{formatCurrency(item.unitCost)}</TableCell>
+                        {showCostPrice && <TableCell>{formatCurrency(item.unitCost)}</TableCell>}
                         <TableCell>{formatCurrency(item.sellingPrice)}</TableCell>
                         <TableCell>{item.reorderLevel}</TableCell>
                         <TableCell>{item.location || '-'}</TableCell>
@@ -158,6 +164,21 @@ export function InventoryTable({ type }: InventoryTableProps) {
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
                             </Button>
+                            {canDelete && (
+                                <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                    if(confirm('Are you sure you want to delete this item?')) {
+                                        // TODO: Implement delete API call
+                                        alert('Delete functionality to be implemented in API');
+                                    }
+                                }}
+                                >
+                                <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
