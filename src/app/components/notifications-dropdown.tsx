@@ -33,7 +33,7 @@ export function NotificationsDropdown() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/notifications?unreadOnly=false&limit=10');
+      const response = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=false&limit=10`);
       if (response.ok) {
         const data = await response.json();
         setNotifications(data);
