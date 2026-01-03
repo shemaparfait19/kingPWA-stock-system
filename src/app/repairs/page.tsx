@@ -7,8 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Search } from 'lucide-react';
 import { KanbanBoard } from './components/kanban-board';
 import { NewRepairDialog } from './components/new-repair-dialog';
+import { useAuth } from '@/app/components/auth-provider';
 
 export default function RepairsPage() {
+  const { user } = useAuth();
   const [repairs, setRepairs] = useState<any[]>([]);
   const [filteredRepairs, setFilteredRepairs] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,10 +85,12 @@ export default function RepairsPage() {
             Manage and track all repair jobs
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Repair Job
-        </Button>
+        {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Repair Job
+          </Button>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

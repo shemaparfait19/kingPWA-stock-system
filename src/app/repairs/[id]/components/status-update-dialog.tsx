@@ -49,6 +49,27 @@ export function StatusUpdateDialog({ open, onOpenChange, repair, onSuccess }: St
       onSuccess();
       onOpenChange(false);
       setNotes('');
+
+      // Prompt for Client Notification
+      if (newStatus === 'ready' || newStatus === 'collected') {
+        if (confirm('Do you want to notify the client via WhatsApp about this update?')) {
+          const phone = repair.customer?.phone ? repair.customer.phone.replace(/\D/g, '') : '';
+          let finalPhone = phone;
+          
+          if (finalPhone) {
+             if (finalPhone.startsWith('07')) finalPhone = '250' + finalPhone.substring(1);
+             else if (finalPhone.startsWith('7')) finalPhone = '250' + finalPhone;
+             
+             const message = newStatus === 'ready' 
+                ? `Hello ${repair.customer.name}, your device (${repair.deviceType}) is ready for pickup at King Service Tech.`
+                : `Hello ${repair.customer.name}, thank you for collecting your device. We appreciate your business!`;
+             
+             window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`, '_blank');
+          } else {
+             alert('Customer phone number not available.');
+          }
+        }
+      }
     } catch (error: any) {
       toast({
         title: 'Error',

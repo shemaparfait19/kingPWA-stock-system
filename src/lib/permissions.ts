@@ -15,7 +15,9 @@ export type Permission =
   | 'manage_settings'
   | 'delete_repairs'
   | 'delete_sales'
-  | 'view_cost_price';
+  | 'view_cost_price'
+  | 'manage_repairs'
+  | 'manage_sales';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   owner: [
@@ -27,6 +29,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'delete_repairs',
     'delete_sales',
     'view_cost_price',
+    'manage_repairs',
+    'manage_sales',
   ],
   manager: [
     'view_reports',
@@ -34,12 +38,15 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'adjust_stock',
     'delete_repairs',
     'view_cost_price',
+    'manage_repairs',
+    'manage_sales',
   ],
   technician: [
     // Technicians primarily work on assigned jobs.
     // They generally don't need to see cost prices or delete things.
   ],
   sales: [
+    'manage_sales',
     // Sales staff operate POS.
     // They shouldn't delete sales history or inventory.
   ],
@@ -67,4 +74,12 @@ export function canManageUsers(role: string | undefined) {
 
 export function canViewReports(role: string | undefined) {
   return hasPermission(role, 'view_reports');
+}
+
+export function canManageRepairs(role: string | undefined) {
+  return hasPermission(role, 'manage_repairs');
+}
+
+export function canManageSales(role: string | undefined) {
+  return hasPermission(role, 'manage_sales');
 }

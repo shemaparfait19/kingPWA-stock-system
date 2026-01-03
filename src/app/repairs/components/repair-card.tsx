@@ -13,6 +13,7 @@ import { MoreVertical, Clock, User, Calendar } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/app/components/auth-provider';
 
 interface RepairCardProps {
   repair: any;
@@ -28,6 +29,7 @@ const priorityColors = {
 export function RepairCard({ repair, onUpdate }: RepairCardProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
   const isOverdue = new Date(repair.promisedDate) < new Date() && 
     !['collected', 'abandoned'].includes(repair.status);
 
@@ -72,39 +74,41 @@ export function RepairCard({ repair, onUpdate }: RepairCardProps) {
               {repair.customer.name}
             </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                handleStatusChange('diagnosed');
-              }}>
-                Mark as Diagnosed
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                handleStatusChange('in_progress');
-              }}>
-                Start Repair
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                handleStatusChange('ready');
-              }}>
-                Mark as Ready
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                handleStatusChange('collected');
-              }}>
-                Mark as Collected
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusChange('diagnosed');
+                }}>
+                  Mark as Diagnosed
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusChange('in_progress');
+                }}>
+                  Start Repair
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusChange('ready');
+                }}>
+                  Mark as Ready
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleStatusChange('collected');
+                }}>
+                  Mark as Collected
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-2">

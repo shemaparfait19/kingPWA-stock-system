@@ -9,19 +9,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Camera, FileText, Package, Clock, CheckCircle } from 'lucide-react';
 import { formatCurrency, formatDateTime, getRepairStatusColor, getPriorityColor } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/app/components/auth-provider';
 import { RepairTimeline } from './components/repair-timeline';
 import { DiagnosisForm } from './components/diagnosis-form';
 import { PartsUsed } from './components/parts-used';
 import { PhotoGallery } from './components/photo-gallery';
 import { StatusUpdateDialog } from './components/status-update-dialog';
+import { RepairInvoiceDialog } from './components/repair-invoice-dialog';
 
 export default function RepairDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [repair, setRepair] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -77,9 +81,15 @@ export default function RepairDetailPage() {
           <Badge className={statusColor.bgColor + ' ' + statusColor.color}>
             {repair.status.replace('_', ' ')}
           </Badge>
-          <Button onClick={() => setShowStatusDialog(true)}>
-            Update Status
+          <Button variant="outline" onClick={() => setShowInvoiceDialog(true)}>
+            <FileText className="h-4 w-4 mr-2" />
+            Invoice
           </Button>
+          {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
+            <Button onClick={() => setShowStatusDialog(true)}>
+              Update Status
+            </Button>
+          )}
         </div>
       </div>
 
@@ -229,6 +239,13 @@ export default function RepairDetailPage() {
         onOpenChange={setShowStatusDialog}
         repair={repair}
         onSuccess={fetchRepair}
+      />
+
+      {/* Invoice Dialog */}
+      <RepairInvoiceDialog
+        open={showInvoiceDialog}
+        onOpenChange={setShowInvoiceDialog}
+        repair={repair}
       />
     </div>
   );

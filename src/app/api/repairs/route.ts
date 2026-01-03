@@ -1,6 +1,7 @@
 // API route for repairs - GET all repairs and POST new repair
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendPushNotification } from '@/lib/push-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -186,6 +187,15 @@ export async function POST(request: NextRequest) {
             relatedId: repair.id,
           },
         });
+        
+        // Send Push Notification
+        await sendPushNotification(
+          assignedTo,
+          'New Repair Assigned',
+          `Job ${jobNumber} has been assigned to you.`,
+          `/repairs/${repair.id}`
+        );
+        
         console.log('Notification created for technician');
       } catch (notifError) {
         console.error('Failed to create notification (non-critical):', notifError);

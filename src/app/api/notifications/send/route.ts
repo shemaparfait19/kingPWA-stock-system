@@ -36,18 +36,24 @@ export async function POST(request: NextRequest) {
       )
     );
 
-    // TODO: Send actual push notifications using web-push
-    // const webpush = require('web-push');
-    // webpush.setVapidDetails(
-    //   process.env.VAPID_SUBJECT,
-    //   process.env.VAPID_PUBLIC_KEY,
-    //   process.env.VAPID_PRIVATE_KEY
-    // );
-    // await webpush.sendNotification(subscription, JSON.stringify(payload));
+    // Send actual push notifications
+    const pushResults = await Promise.all(
+      targetUserIds.map((uid: string) =>
+        sendPushNotification(
+          uid,
+          title,
+          message,
+          data?.url || '/'
+        )
+      )
+    );
+    
+    console.log('Push results:', pushResults);
 
     return NextResponse.json({
       success: true,
       sent: notifications.length,
+      pushSent: pushResults.reduce((acc, res) => acc + (res.sent || 0), 0),
     });
   } catch (error: any) {
     console.error('Error sending notification:', error);
@@ -57,3 +63,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+import { sendPushNotification } from '@/lib/push-service';

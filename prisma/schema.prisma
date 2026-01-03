@@ -11,17 +11,17 @@ datasource db {
 
 // User Management
 model User {
-  id            String    @id @default(cuid())
-  username      String    @unique
-  email         String    @unique
-  passwordHash  String
-  role          UserRole
-  fullName      String
-  phone         String
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  lastLogin     DateTime?
-  
+  id           String    @id @default(cuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  role         UserRole
+  fullName     String
+  phone        String
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+
   // Relations
   inventoryTransactions InventoryTransaction[]
   repairJobs            RepairJob[]            @relation("AssignedRepairs")
@@ -31,8 +31,9 @@ model User {
   createdAppointments   Appointment[]          @relation("CreatedAppointments")
   expenses              Expense[]
   notifications         Notification[]
+  pushSubscriptions     PushSubscription[]
   activityLogs          ActivityLog[]
-  
+
   @@map("users")
 }
 
@@ -58,12 +59,12 @@ model Customer {
   notes         String?
   blacklisted   Boolean      @default(false)
   createdAt     DateTime     @default(now())
-  
+
   // Relations
   repairJobs    RepairJob[]
   salesInvoices SalesInvoice[]
   appointments  Appointment[]
-  
+
   @@map("customers")
 }
 
@@ -81,12 +82,12 @@ model InventoryCategory {
   type      InventoryType
   parentId  String?
   createdAt DateTime      @default(now())
-  
+
   // Relations
-  parent    InventoryCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children  InventoryCategory[] @relation("CategoryHierarchy")
-  items     InventoryItem[]
-  
+  parent   InventoryCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children InventoryCategory[] @relation("CategoryHierarchy")
+  items    InventoryItem[]
+
   @@map("inventory_categories")
 }
 
@@ -96,29 +97,29 @@ enum InventoryType {
 }
 
 model InventoryItem {
-  id              String    @id @default(cuid())
+  id              String   @id @default(cuid())
   categoryId      String
   name            String
-  sku             String    @unique
+  sku             String   @unique
   barcode         String?
   unitCost        Float
   sellingPrice    Float
-  quantity        Int       @default(0)
-  reorderLevel    Int       @default(10)
-  reorderQuantity Int       @default(50)
+  quantity        Int      @default(0)
+  reorderLevel    Int      @default(10)
+  reorderQuantity Int      @default(50)
   location        String?
   supplierId      String?
-  lowStockAlert   Boolean   @default(false)
-  active          Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  
+  lowStockAlert   Boolean  @default(false)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
   // Relations
-  category      InventoryCategory      @relation(fields: [categoryId], references: [id])
-  supplier      Supplier?              @relation(fields: [supplierId], references: [id])
-  transactions  InventoryTransaction[]
-  repairParts   RepairPartUsed[]
-  salesItems    SalesItem[]
-  
+  category     InventoryCategory      @relation(fields: [categoryId], references: [id])
+  supplier     Supplier?              @relation(fields: [supplierId], references: [id])
+  transactions InventoryTransaction[]
+  repairParts  RepairPartUsed[]
+  salesItems   SalesItem[]
+
   @@map("inventory_items")
 }
 
@@ -132,11 +133,11 @@ model InventoryTransaction {
   userId      String
   notes       String?
   createdAt   DateTime          @default(now())
-  
+
   // Relations
   item InventoryItem @relation(fields: [itemId], references: [id])
   user User          @relation(fields: [userId], references: [id])
-  
+
   @@map("inventory_transactions")
 }
 
@@ -157,8 +158,8 @@ enum TransactionReason {
 
 // Repair Management
 model RepairJob {
-  id                 String        @id @default(cuid())
-  jobNumber          String        @unique
+  id                 String         @id @default(cuid())
+  jobNumber          String         @unique
   customerId         String
   deviceType         String
   brand              String
@@ -167,27 +168,27 @@ model RepairJob {
   imei               String?
   problemDescription String
   diagnosis          String?
-  estimatedCost      Float         @default(0)
-  actualCost         Float         @default(0)
-  depositPaid        Float         @default(0)
-  balance            Float         @default(0)
-  status             RepairStatus  @default(pending)
+  estimatedCost      Float          @default(0)
+  actualCost         Float          @default(0)
+  depositPaid        Float          @default(0)
+  balance            Float          @default(0)
+  status             RepairStatus   @default(pending)
   priority           RepairPriority @default(normal)
   assignedTo         String?
   promisedDate       DateTime
   photoUrls          String[]
-  createdAt          DateTime      @default(now())
+  createdAt          DateTime       @default(now())
   createdBy          String
   startedAt          DateTime?
   completedAt        DateTime?
   collectedAt        DateTime?
-  
+
   // Relations
-  customer      Customer           @relation(fields: [customerId], references: [id])
-  assignedUser  User?              @relation("AssignedRepairs", fields: [assignedTo], references: [id])
-  createdByUser User               @relation("CreatedRepairs", fields: [createdBy], references: [id])
+  customer      Customer         @relation(fields: [customerId], references: [id])
+  assignedUser  User?            @relation("AssignedRepairs", fields: [assignedTo], references: [id])
+  createdByUser User             @relation("CreatedRepairs", fields: [createdBy], references: [id])
   partsUsed     RepairPartUsed[]
-  
+
   @@map("repair_jobs")
 }
 
@@ -207,19 +208,19 @@ enum RepairPriority {
 }
 
 model RepairPartUsed {
-  id           String   @id @default(cuid())
-  repairJobId  String
-  itemId       String?
-  customName   String?
-  quantity     Int
-  unitCost     Float
-  totalCost    Float
-  createdAt    DateTime @default(now())
-  
+  id          String   @id @default(cuid())
+  repairJobId String
+  itemId      String?
+  customName  String?
+  quantity    Int
+  unitCost    Float
+  totalCost   Float
+  createdAt   DateTime @default(now())
+
   // Relations
   repairJob RepairJob      @relation(fields: [repairJobId], references: [id])
   item      InventoryItem? @relation(fields: [itemId], references: [id])
-  
+
   @@map("repair_parts_used")
 }
 
@@ -238,12 +239,12 @@ model SalesInvoice {
   paymentStatus PaymentStatus @default(unpaid)
   userId        String
   createdAt     DateTime      @default(now())
-  
+
   // Relations
   customer Customer?   @relation(fields: [customerId], references: [id])
   user     User        @relation(fields: [userId], references: [id])
   items    SalesItem[]
-  
+
   @@map("sales_invoices")
 }
 
@@ -262,18 +263,18 @@ enum PaymentStatus {
 }
 
 model SalesItem {
-  id        String   @id @default(cuid())
+  id        String @id @default(cuid())
   invoiceId String
   itemId    String
   quantity  Int
   unitPrice Float
-  discount  Float    @default(0)
+  discount  Float  @default(0)
   total     Float
-  
+
   // Relations
   invoice SalesInvoice  @relation(fields: [invoiceId], references: [id])
   item    InventoryItem @relation(fields: [itemId], references: [id])
-  
+
   @@map("sales_items")
 }
 
@@ -284,18 +285,18 @@ model Appointment {
   title           String
   description     String
   appointmentDate DateTime
-  duration        Int               // minutes
+  duration        Int // minutes
   status          AppointmentStatus @default(scheduled)
   assignedTo      String
   location        String?
   createdBy       String
   createdAt       DateTime          @default(now())
-  
+
   // Relations
   customer     Customer @relation(fields: [customerId], references: [id])
   assignedUser User     @relation("AssignedAppointments", fields: [assignedTo], references: [id])
   createdUser  User     @relation("CreatedAppointments", fields: [createdBy], references: [id])
-  
+
   @@map("appointments")
 }
 
@@ -315,10 +316,10 @@ model Expense {
   userId      String
   notes       String?
   createdAt   DateTime @default(now())
-  
+
   // Relations
   user User @relation(fields: [userId], references: [id])
-  
+
   @@map("expenses")
 }
 
@@ -331,10 +332,10 @@ model Notification {
   read      Boolean          @default(false)
   relatedId String?
   createdAt DateTime         @default(now())
-  
+
   // Relations
   user User @relation(fields: [userId], references: [id])
-  
+
   @@map("notifications")
 }
 
@@ -348,19 +349,19 @@ enum NotificationType {
 
 // Activity Logs
 model ActivityLog {
-  id         String   @id @default(cuid())
-  userId     String
-  action     String
-  tableName  String
-  recordId   String
-  oldValue   String?
-  newValue   String?
-  ipAddress  String?
-  createdAt  DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  tableName String
+  recordId  String
+  oldValue  String?
+  newValue  String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
   // Relations
   user User @relation(fields: [userId], references: [id])
-  
+
   @@map("activity_logs")
 }
 
@@ -375,9 +376,24 @@ model Supplier {
   notes         String?
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
-  
+
   // Relations
   items InventoryItem[]
-  
+
   @@map("suppliers")
+}
+
+// Push Notifications
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
 }

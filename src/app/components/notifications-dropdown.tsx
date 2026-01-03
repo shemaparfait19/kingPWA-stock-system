@@ -32,6 +32,7 @@ export function NotificationsDropdown() {
   }, [user]);
 
   const fetchNotifications = async () => {
+    if (!user) return;
     try {
       const response = await fetch(`/api/notifications?userId=${user.id}&unreadOnly=false&limit=10`);
       if (response.ok) {
@@ -70,6 +71,57 @@ export function NotificationsDropdown() {
     // Add other types here
   };
 
+  // ... (previous code)
+
+  // Helper for converting logic
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+  
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+  
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  const subscribeToPush = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+      
+      if (!vapidPublicKey) {
+        console.error('VAPID public key not found');
+        return;
+      }
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      });
+
+      if (!user?.id) return;
+
+      await fetch('/api/notifications/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          subscription: subscription.toJSON(),
+        }),
+      });
+      
+      alert('Push notifications enabled!');
+    } catch (error) {
+      console.error('Failed to subscribe to push', error);
+      alert('Failed to enable push notifications. Check permissions.');
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -87,7 +139,12 @@ export function NotificationsDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80" align="end">
-        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex justify-between items-center">
+             <span>Notifications</span>
+             <Button variant="ghost" size="sm" onClick={subscribeToPush} className="text-xs h-6 px-2">
+                Enable Push
+             </Button>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">

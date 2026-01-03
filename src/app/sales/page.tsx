@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Trash2, ShoppingCart, History } from 'lucide-react';
+import { Plus, Search, Trash2, ShoppingCart, History } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/app/components/auth-provider';
@@ -153,13 +153,17 @@ export default function SalesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Point of Sale</h2>
-          <p className="text-muted-foreground">Quick checkout system</p>
+          <h2 className="text-2xl font-bold tracking-tight">Sales</h2>
+          <p className="text-muted-foreground">
+            Manage sales and invoices
+          </p>
         </div>
-        <Button variant="outline" onClick={() => router.push('/sales/history')}>
-          <History className="h-4 w-4 mr-2" />
-          Sales History
-        </Button>
+        {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
+          <Button onClick={() => setShowInvoice(true)}> {/* Assuming setDialogOpen refers to setShowInvoice for consistency with the page's state */}
+            <Plus className="mr-2 h-4 w-4" />
+            New Sale
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
