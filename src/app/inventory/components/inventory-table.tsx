@@ -19,7 +19,7 @@ import type { InventoryType } from '@/lib/types';
 import { ItemDialog } from './item-dialog';
 import { StockAdjustmentDialog } from './stock-adjustment-dialog';
 import { useAuth } from '@/app/components/auth-provider';
-import { canDeleteInventory, hasPermission } from '@/lib/permissions';
+import { canDeleteInventory, canEditInventory, hasPermission } from '@/lib/permissions';
 
 interface InventoryTableProps {
   type: InventoryType;
@@ -36,6 +36,8 @@ export function InventoryTable({ type }: InventoryTableProps) {
   
   const showCostPrice = hasPermission(user?.role, 'view_cost_price');
   const canDelete = canDeleteInventory(user?.role);
+  const canEdit = canEditInventory(user?.role);
+  const canAdjust = hasPermission(user?.role, 'adjust_stock');
 
   useEffect(() => {
     fetchItems();
@@ -148,22 +150,26 @@ export function InventoryTable({ type }: InventoryTableProps) {
                         <TableCell>{item.location || '-'}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setAdjustItem(item)}
-                            >
-                              <Package className="h-4 w-4 mr-1" />
-                              Adjust
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditItem(item)}
-                            >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
-                            </Button>
+                            {canAdjust && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setAdjustItem(item)}
+                              >
+                                <Package className="h-4 w-4 mr-1" />
+                                Adjust
+                              </Button>
+                            )}
+                            {canEdit && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditItem(item)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                            )}
                             {canDelete && (
                                 <Button
                                 variant="ghost"

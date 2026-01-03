@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendPushNotification } from '@/lib/push-service';
 
+import { auth } from '@/lib/auth';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -48,6 +50,11 @@ export async function POST(request: NextRequest) {
   let body: any;
   
   try {
+    const session = await auth();
+    if (!session || !session.user) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     body = await request.json();
     console.log('Creating repair with data:', JSON.stringify(body, null, 2));
     

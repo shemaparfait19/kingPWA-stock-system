@@ -1,7 +1,7 @@
 // API route for sales history
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
+import { canManageSales } from '@/lib/permissions';
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
         user: {
           select: {
             fullName: true,
+            email: true, // Also include email just in case
+            role: true, // Need to fetch role to verify permission if not in session? No session has it.
           },
         },
         items: {
@@ -53,34 +55,11 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     console.log('Sales POST Session:', JSON.stringify(session, null, 2));
 
-    let userId = session?.user?.id;
-
-    // Fallback: If no session, find the first admin user
-    if (!userId) {
-      console.warn('No session found. Falling back to default admin user for development/testing.');
-      const adminUser = await prisma.user.findFirst({
-        where: { role: 'owner' }, // or 'admin' depending on your data
-      });
-      
-      if (adminUser) {
-        userId = adminUser.id;
-        console.log('Using fallback admin user:', userId);
-      } else {
-         // Try finding ANY user if no owner exists
-         const anyUser = await prisma.user.findFirst();
-         if (anyUser) {
-           userId = anyUser.id;
-           console.log('Using fallback generic user:', userId);
-         }
-      }
+    if (!session || !session.user || !canManageSales(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    if (!userId) {
-       return NextResponse.json(
-        { error: 'Unauthorized: No user found to attribute sale to.' },
-        { status: 401 }
-      );
-    }
+    let userId = session.user.id;
 
     const body = await request.json();
     const { items, customerId, paymentMethod, discount, amountPaid } = body;

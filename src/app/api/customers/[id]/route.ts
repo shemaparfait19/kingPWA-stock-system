@@ -2,11 +2,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { auth } from '@/lib/auth';
+import { canDeleteCustomers } from '@/lib/permissions';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth();
+    if (!session || !session.user) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const customer = await prisma.customer.findUnique({
       where: { id: params.id },
       include: {
@@ -47,6 +55,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth();
+    if (!session || !session.user) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+    
     const body = await request.json();
 
     const customer = await prisma.customer.update({
@@ -77,6 +90,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth();
+    if (!session || !session.user || !canDeleteCustomers(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized: Only Admins can delete customers" }, { status: 403 });
+    }
+    
     await prisma.customer.delete({
       where: { id: params.id },
     });

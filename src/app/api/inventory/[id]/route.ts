@@ -1,12 +1,21 @@
 // API route for individual inventory item operations
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
+import { canEditInventory, canDeleteInventory } from '@/lib/permissions';
+
+
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth();
+    if (!session || !session.user || !canEditInventory(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const body = await request.json();
 
     // Check if item exists
@@ -56,6 +65,45 @@ export async function PATCH(
     
     return NextResponse.json(
       { error: error.message || 'Failed to update item' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !canDeleteInventory(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized: Only Owners can delete inventory" }, { status: 403 });
+    }
+
+    const existingItem = await prisma.inventoryItem.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingItem) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+    }
+    
+    // Check constraints if any (handled by try-catch foreign key)
+    
+    await prisma.inventoryItem.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ message: 'Item deleted successfully' });
+  } catch (error: any) {
+    if (error.code === 'P2003') {
+       return NextResponse.json(
+        { error: 'Cannot delete item because it is referenced in Sales or Repairs.' },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete item' },
       { status: 500 }
     );
   }

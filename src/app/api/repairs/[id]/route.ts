@@ -2,6 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { auth } from '@/lib/auth';
+import { canEditRepairDetails, hasPermission } from '@/lib/permissions'; 
+// using hasPermission for delete_repairs if canDeleteRepairs helper missing.
+// Checking permissions.ts again... I see 'delete_repairs' key but no helper?
+// I exported canEditRepairDetails.
+// I did NOT export canDeleteRepairs?
+// I will use hasPermission(role, 'delete_repairs').
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -55,6 +63,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth();
+    if (!session || !session.user || !canEditRepairDetails(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized: Need manage permissions" }, { status: 403 });
+    }
+
     const body = await request.json();
 
     const repair = await prisma.repairJob.update({
@@ -86,6 +99,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth();
+    // Check permission for deleting repairs. Key is 'delete_repairs'.
+    if (!session || !session.user || !hasPermission(session.user.role, 'delete_repairs')) {
+       return NextResponse.json({ error: "Unauthorized: Only Admins can delete repairs" }, { status: 403 });
+    }
+
     await prisma.repairJob.delete({
       where: { id: params.id },
     });

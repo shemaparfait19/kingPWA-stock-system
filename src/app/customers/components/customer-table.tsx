@@ -13,30 +13,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, User } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
-
-interface CustomerTableProps {
-  customers: any[];
-  loading: boolean;
-  onUpdate: () => void;
-}
-
-const customerTypeColors = {
-  walk_in: 'bg-gray-500',
-  regular: 'bg-blue-500',
-  vip: 'bg-purple-500',
-  corporate: 'bg-green-500',
-};
-
-const customerTypeLabels = {
-  walk_in: 'Walk-in',
-  regular: 'Regular',
-  vip: 'VIP',
-  corporate: 'Corporate',
-};
+import { Trash2 } from 'lucide-react';
+import { useAuth } from '@/app/components/auth-provider';
+import { canDeleteCustomers } from '@/lib/permissions';
 
 export function CustomerTable({ customers, loading, onUpdate }: CustomerTableProps) {
   const router = useRouter();
+  const { user } = useAuth();
+  const canDelete = canDeleteCustomers(user?.role);
 
   if (loading) {
     return (
@@ -98,6 +82,31 @@ export function CustomerTable({ customers, loading, onUpdate }: CustomerTablePro
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+                      {canDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if(confirm('Are you sure you want to delete this customer?')) {
+                                try {
+                                    const res = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' });
+                                    if(res.ok) {
+                                        onUpdate();
+                                    } else {
+                                        const err = await res.json();
+                                        alert(err.error || 'Failed to delete');
+                                    }
+                                } catch(err: any) {
+                                    alert('Error deleting');
+                                }
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -7,9 +7,13 @@ import { Plus } from 'lucide-react';
 import { InventoryTable } from './components/inventory-table';
 import { ItemDialog } from './components/item-dialog';
 
+import { useAuth } from '@/app/components/auth-provider';
+import { canCreateInventory } from '@/lib/permissions';
+
 export default function InventoryPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'SHOP' | 'REPAIR'>('SHOP');
+  const { user } = useAuth();
 
   const handleAddItem = () => {
     setDialogOpen(true);
@@ -24,10 +28,12 @@ export default function InventoryPage() {
             Manage shop stock and repair parts inventory
           </p>
         </div>
-        <Button onClick={handleAddItem}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Item
-        </Button>
+        {canCreateInventory(user?.role) && (
+          <Button onClick={handleAddItem}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Item
+          </Button>
+        )}
       </div>
 
       <Tabs defaultValue="shop" className="space-y-4" onValueChange={(v) => setSelectedType(v as any)}>

@@ -1,6 +1,7 @@
-// API route for inventory items
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
+import { canCreateInventory } from '@/lib/permissions';
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,13 +34,15 @@ export async function POST(request: NextRequest) {
   let body: any;
   
   try {
+    const session = await auth();
+    if (!session || !session.user || !canCreateInventory(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     body = await request.json();
-    
-    console.log('Received inventory item data:', JSON.stringify(body, null, 2));
     
     // Validate required fields
     if (!body.name || !body.sku || !body.categoryId) {
-      console.error('Missing required fields:', { name: body.name, sku: body.sku, categoryId: body.categoryId });
       return NextResponse.json(
         { error: 'Missing required fields: name, sku, and categoryId are required' },
         { status: 400 }
@@ -52,14 +55,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!category) {
-      console.error('Category not found:', body.categoryId);
       return NextResponse.json(
         { error: `Category with ID ${body.categoryId} not found` },
         { status: 400 }
       );
     }
-
-    console.log('Creating item with category:', category.name);
 
     // Create the item
     const item = await prisma.inventoryItem.create({
@@ -83,21 +83,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('Item created successfully:', item.id);
     return NextResponse.json(item);
   } catch (error: any) {
-    console.error('Error creating item - Full error:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    
-    // Check for unique constraint violation (duplicate SKU)
+    console.error('Error creating item:', error);
     if (error.code === 'P2002') {
       return NextResponse.json(
         { error: `An item with SKU "${body?.sku}" already exists` },
         { status: 400 }
       );
     }
-    
     return NextResponse.json(
       { error: error.message || 'Failed to create item' },
       { status: 500 }

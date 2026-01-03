@@ -19,11 +19,22 @@ import { useAuth } from '@/app/components/auth-provider';
 import { useRouter } from 'next/navigation';
 import { CustomerSearch } from './components/customer-search';
 import { InvoiceDialog } from './components/invoice-dialog';
+import { canManageSales } from '@/lib/permissions';
 
 export default function SalesPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
+  
+  if (user && !canManageSales(user.role)) {
+      return (
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+              <h2 className="text-2xl font-bold text-red-600">Unauthorized</h2>
+              <p className="text-muted-foreground">You do not have permission to access the Point of Sale.</p>
+          </div>
+      )
+  }
+
   const [items, setItems] = useState<any[]>([]);
   const [cart, setCart] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

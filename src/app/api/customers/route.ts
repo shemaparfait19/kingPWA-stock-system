@@ -2,8 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { auth } from '@/lib/auth';
+
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session || !session.user) {
+        // Technically viewing customers might be sensitive too, but for POS it's needed.
+        // Let's at least require login.
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const customers = await prisma.customer.findMany({
       orderBy: {
         createdAt: 'desc',
@@ -22,6 +31,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session || !session.user) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { name, phone, phone2, email, address, customerType, notes } = body;
 

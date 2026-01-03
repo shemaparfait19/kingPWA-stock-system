@@ -17,7 +17,11 @@ export type Permission =
   | 'delete_sales'
   | 'view_cost_price'
   | 'manage_repairs'
-  | 'manage_sales';
+  | 'manage_sales'
+  | 'create_inventory'
+  | 'edit_inventory'
+  | 'delete_customers'
+  | 'edit_repair_details';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   owner: [
@@ -31,15 +35,22 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_cost_price',
     'manage_repairs',
     'manage_sales',
+    'create_inventory',
+    'edit_inventory',
+    'delete_customers',
+    'edit_repair_details',
   ],
   manager: [
     'view_reports',
-    'delete_inventory', // Managers can delete items? Maybe restrictive. Let's keep it safe.
     'adjust_stock',
     'delete_repairs',
     'view_cost_price',
     'manage_repairs',
     'manage_sales',
+    'create_inventory',
+    'edit_inventory',
+    'delete_customers',
+    'edit_repair_details',
   ],
   technician: [
     // Technicians primarily work on assigned jobs.
@@ -82,4 +93,24 @@ export function canManageRepairs(role: string | undefined) {
 
 export function canManageSales(role: string | undefined) {
   return hasPermission(role, 'manage_sales');
+}
+
+export function canCreateInventory(role: string | undefined) {
+  return hasPermission(role, 'create_inventory');
+}
+
+export function canEditInventory(role: string | undefined) {
+  return hasPermission(role, 'edit_inventory');
+}
+
+export function canDeleteCustomers(role: string | undefined) {
+  return hasPermission(role, 'delete_customers');
+}
+
+export function canEditRepairDetails(role: string | undefined) {
+  return hasPermission(role, 'edit_repair_details');
+}
+
+export function canDeleteSales(role: string | undefined) {
+  return hasPermission(role, 'delete_sales');
 }
