@@ -24,6 +24,7 @@
     "inventory": "Inventory",
     "customers": "Customers",
     "repairs": "Repairs",
+    "appointments": "Appointments",
     "sales": "Sales",
     "settings": "Settings",
     "reports": "Reports"
