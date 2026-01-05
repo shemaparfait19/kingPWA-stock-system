@@ -13,38 +13,38 @@ export default function SettingsPage() {
   const settingsCards = [
     {
       title: t('users'),
-      description: 'Manage staff accounts, roles, and permissions',
+      description: t('manageUsers'),
       icon: Users,
       color: 'from-blue-500 to-blue-600',
       path: '/settings/users',
     },
     {
-      title: 'Notifications', // TODO: Add to translation file
-      description: 'Configure push notifications and alerts',
+      title: t('cards.notifications'),
+      description: t('cards.notificationsDesc'),
       icon: Bell,
       color: 'from-green-500 to-green-600',
       path: '/settings/notifications',
       comingSoon: true,
     },
     {
-      title: 'Security', // TODO: Add to translation file
-      description: 'Password policies and security settings',
+      title: t('cards.security'),
+      description: t('cards.securityDesc'),
       icon: Lock,
       color: 'from-purple-500 to-purple-600',
       path: '/settings/security',
       comingSoon: true,
     },
     {
-      title: 'Appearance', // TODO: Add to translation file
-      description: 'Customize theme and display preferences',
+      title: t('cards.appearance'),
+      description: t('cards.appearanceDesc'),
       icon: Palette,
       color: 'from-pink-500 to-pink-600',
       path: '/settings/appearance',
       comingSoon: true,
     },
     {
-      title: 'Database', // TODO: Add to translation file
-      description: 'Backup, restore, and data management',
+      title: t('cards.database'),
+      description: t('cards.databaseDesc'),
       icon: Database,
       color: 'from-orange-500 to-orange-600',
       path: '/settings/database',
@@ -52,7 +52,7 @@ export default function SettingsPage() {
     },
     {
       title: t('general'),
-      description: 'Business information and general settings',
+      description: t('generalDesc'),
       icon: SettingsIcon,
       color: 'from-gray-500 to-gray-600',
       path: '/settings/general',
@@ -86,7 +86,7 @@ export default function SettingsPage() {
                   </div>
                   {setting.comingSoon && (
                     <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                      Coming Soon
+                      {t('comingSoon')}
                     </span>
                   )}
                 </div>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
                   className="w-full"
                   disabled={setting.comingSoon}
                 >
-                  {setting.comingSoon ? 'Coming Soon' : 'Configure'}
+                  {setting.comingSoon ? t('comingSoon') : t('configure')}
                 </Button>
               </CardContent>
             </Card>
@@ -110,14 +110,14 @@ export default function SettingsPage() {
       {/* Quick Info */}
       <Card className="bg-blue-50 border-blue-200">
         <CardHeader>
-          <CardTitle className="text-blue-900">Quick Tips</CardTitle>
+          <CardTitle className="text-blue-900">{t('quickTips.title')}</CardTitle>
         </CardHeader>
         <CardContent className="text-blue-800">
           <ul className="space-y-2 list-disc list-inside">
-            <li>Add technicians and staff in User Management</li>
-            <li>Configure notification preferences for important alerts</li>
-            <li>Regular database backups are recommended</li>
-            <li>Update security settings to protect your data</li>
+            <li>{t('quickTips.tip1')}</li>
+            <li>{t('quickTips.tip2')}</li>
+            <li>{t('quickTips.tip3')}</li>
+            <li>{t('quickTips.tip4')}</li>
           </ul>
         </CardContent>
       </Card>

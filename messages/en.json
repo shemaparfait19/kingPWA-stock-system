@@ -33,14 +33,28 @@
     "welcome": "Welcome back",
     "overview": "Overview",
     "recentActivity": "Recent Activity",
+    "recentRepairsDescription": "Most recent repair jobs",
     "attentionNeeded": "Attention Needed",
     "lowStock": "Low Stock Items",
     "overdueRepairs": "Overdue Repairs",
+    "repairStatus": "Repair Status",
     "stats": {
       "totalRevenue": "Total Revenue",
       "activeRepairs": "Active Repairs",
       "lowStockItems": "Low Stock Items",
-      "pendingOrders": "Pending Orders"
+      "pendingOrders": "Pending Orders",
+      "todaySales": "Today's Sales",
+      "todaySalesDesc": "Total revenue from sales",
+      "repairRevenue": "Repair Revenue",
+      "repairRevenueDesc": "Total revenue from repairs",
+      "netProfit": "Net Profit",
+      "netProfitDesc": "Total profit after costs",
+      "itemsLowStock": "items low on stock",
+      "repairsOverdue": "repairs overdue",
+      "unpaidInvoices": "in unpaid invoices",
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "readyForPickup": "Ready for Pickup"
     }
   },
   "inventory": {
@@ -100,6 +114,16 @@
     "promisedDate": "Promised Date",
     "assignedTo": "Assigned To",
     "searchPlaceholder": "Search jobs...",
+    "noRepairs": "No repair jobs yet",
+    "overdue": "Overdue",
+    "actions": {
+      "markDiagnosed": "Mark as Diagnosed",
+      "startRepair": "Start Repair",
+      "markReady": "Mark as Ready",
+      "markCollected": "Mark as Collected",
+      "statusUpdated": "Status updated",
+      "jobMoved": "Job {jobNumber} moved to {status}"
+    },
     "statuses": {
       "pending": "Pending",
       "diagnosed": "Diagnosed",
@@ -177,9 +201,30 @@
     "title": "Settings",
     "profile": "Profile",
     "users": "Users",
+    "manageUsers": "Manage staff accounts, roles, and permissions",
     "general": "General",
+    "generalDesc": "Business information and general settings",
     "language": "Language",
-    "changeLanguage": "Change Language"
+    "changeLanguage": "Change Language",
+    "comingSoon": "Coming Soon",
+    "configure": "Configure",
+    "cards": {
+      "notifications": "Notifications",
+      "notificationsDesc": "Configure push notifications and alerts",
+      "security": "Security",
+      "securityDesc": "Password policies and security settings",
+      "appearance": "Appearance",
+      "appearanceDesc": "Customize theme and display preferences",
+      "database": "Database",
+      "databaseDesc": "Backup, restore, and data management"
+    },
+    "quickTips": {
+      "title": "Quick Tips",
+      "tip1": "Add technicians and staff in User Management",
+      "tip2": "Configure notification preferences for important alerts",
+      "tip3": "Regular database backups are recommended",
+      "tip4": "Update security settings to protect your data"
+    }
   },
   "auth": {
     "login": "Login",

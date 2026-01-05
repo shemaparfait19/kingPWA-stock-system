@@ -14,6 +14,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/app/components/auth-provider';
+import { useTranslations } from 'next-intl';
 
 interface RepairCardProps {
   repair: any;
@@ -27,6 +28,8 @@ const priorityColors = {
 };
 
 export function RepairCard({ repair, onUpdate }: RepairCardProps) {
+  const t = useTranslations('repairs.actions');
+  const tRepairs = useTranslations('repairs');
   const router = useRouter();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -44,8 +47,8 @@ export function RepairCard({ repair, onUpdate }: RepairCardProps) {
       if (!response.ok) throw new Error('Failed to update status');
 
       toast({
-        title: 'Status updated',
-        description: `Job ${repair.jobNumber} moved to ${newStatus}`,
+        title: t('statusUpdated'),
+        description: t('jobMoved', {jobNumber: repair.jobNumber, status: newStatus}),
       });
       onUpdate();
     } catch (error: any) {
@@ -86,25 +89,25 @@ export function RepairCard({ repair, onUpdate }: RepairCardProps) {
                   e.stopPropagation();
                   handleStatusChange('diagnosed');
                 }}>
-                  Mark as Diagnosed
+                  {t('markDiagnosed')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
                   handleStatusChange('in_progress');
                 }}>
-                  Start Repair
+                  {t('startRepair')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
                   handleStatusChange('ready');
                 }}>
-                  Mark as Ready
+                  {t('markReady')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
                   handleStatusChange('collected');
                 }}>
-                  Mark as Collected
+                  {t('markCollected')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -114,11 +117,11 @@ export function RepairCard({ repair, onUpdate }: RepairCardProps) {
       <CardContent className="space-y-2">
         <div className="flex items-center gap-2">
           <Badge className={priorityColors[repair.priority as keyof typeof priorityColors]}>
-            {repair.priority}
+            {tRepairs(`form.priorities.${repair.priority}`)}
           </Badge>
           {isOverdue && (
             <Badge variant="destructive" className="text-xs">
-              Overdue
+              {tRepairs('overdue')}
             </Badge>
           )}
         </div>

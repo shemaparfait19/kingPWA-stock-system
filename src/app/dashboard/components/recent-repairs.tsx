@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -34,24 +35,10 @@ const getStatusVariant = (status: string) => {
   }
 };
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'in_progress':
-      return 'In Progress';
-    case 'ready':
-      return 'Ready';
-    case 'pending':
-      return 'Pending';
-    case 'diagnosed':
-      return 'Diagnosed';
-    case 'collected':
-      return 'Collected';
-    default:
-      return status;
-  }
-};
-
 export function RecentRepairs() {
+  const t = useTranslations('dashboard');
+  const tRepairs = useTranslations('repairs');
+  const tCommon = useTranslations('common');
   const [repairs, setRepairs] = useState<any[]>([]);
   const router = useRouter();
 
@@ -75,22 +62,22 @@ export function RecentRepairs() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Repairs</CardTitle>
-        <CardDescription>Most recent repair jobs</CardDescription>
+        <CardTitle>{t('recentActivity')}</CardTitle>
+        <CardDescription>{t('recentRepairsDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         {repairs.length === 0 ? (
           <p className="text-center text-muted-foreground py-4">
-            No repair jobs yet
+            {tRepairs('noRepairs')}
           </p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Job ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Device</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{tRepairs('jobNumber')}</TableHead>
+                <TableHead>{tRepairs('customer')}</TableHead>
+                <TableHead>{tRepairs('device')}</TableHead>
+                <TableHead>{tCommon('status')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -105,7 +92,7 @@ export function RecentRepairs() {
                   <TableCell>{repair.deviceType} - {repair.brand}</TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(repair.status)}>
-                      {getStatusLabel(repair.status)}
+                      {tRepairs(`statuses.${repair.status}`)}
                     </Badge>
                   </TableCell>
                 </TableRow>

@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
 
 export function RepairStatus() {
+  const t = useTranslations('dashboard');
+  const tStats = useTranslations('dashboard.stats');
   const [stats, setStats] = useState({
     pending: 0,
     activeRepairs: 0,
@@ -31,15 +34,15 @@ export function RepairStatus() {
   }, []);
 
   const statuses = [
-    { label: 'Pending', count: stats.pending, color: 'bg-yellow-500' },
-    { label: 'In Progress', count: stats.activeRepairs, color: 'bg-blue-500' },
-    { label: 'Ready for Pickup', count: stats.readyForPickup, color: 'bg-green-500' },
+    { label: tStats('pending'), count: stats.pending, color: 'bg-yellow-500' },
+    { label: tStats('inProgress'), count: stats.activeRepairs, color: 'bg-blue-500' },
+    { label: tStats('readyForPickup'), count: stats.readyForPickup, color: 'bg-green-500' },
   ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Repair Status</CardTitle>
+        <CardTitle>{t('repairStatus')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-4">

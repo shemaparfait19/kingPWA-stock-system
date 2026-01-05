@@ -33,14 +33,28 @@
     "welcome": "Murakaza neza",
     "overview": "Incamake",
     "recentActivity": "Ibikorwa Biheruka",
+    "recentRepairsDescription": "Imirimo yo gusana iheruka",
     "attentionNeeded": "Bisaba Kwitabwaho",
     "lowStock": "Ibicuruzwa Bike",
     "overdueRepairs": "Gusana Gutinze",
+    "repairStatus": "Imiterere yo Gusana",
     "stats": {
       "totalRevenue": "Amafaranga Yinjije",
       "activeRepairs": "Gusana Gukomeje",
       "lowStockItems": "Ibicuruzwa Bike",
-      "pendingOrders": "Ibisabwa Bitegereje"
+      "pendingOrders": "Ibisabwa Bitegereje",
+      "todaySales": "Igurisha ry'Uyu Munsi",
+      "todaySalesDesc": "Amafaranga agurisha yose",
+      "repairRevenue": "Amafaranga yo Gusana",
+      "repairRevenueDesc": "Amafaranga yo gusana yose",
+      "netProfit": "Inyungu",
+      "netProfitDesc": "Inyungu nyuma y'ibiguzi",
+      "itemsLowStock": "ibicuruzwa bike",
+      "repairsOverdue": "gusana gutinze",
+      "unpaidInvoices": "fagitire zitarishyuwe",
+      "pending": "Itegereje",
+      "inProgress": "Irimo Gukorwa",
+      "readyForPickup": "Yiteguye Kujyanwa"
     }
   },
   "inventory": {
@@ -100,6 +114,16 @@
     "promisedDate": "Itariki Yasezeranijwe",
     "assignedTo": "Yahawe",
     "searchPlaceholder": "Shakisha imirimo...",
+    "noRepairs": "Nta mirimo yo gusana iraboneka",
+    "overdue": "Byatinze",
+    "actions": {
+      "markDiagnosed": "Shyiraho Yasuzumwe",
+      "startRepair": "Tangira Gusana",
+      "markReady": "Shyiraho Byiteguye",
+      "markCollected": "Shyiraho Byakuwe",
+      "statusUpdated": "Imiterere yahinduwe",
+      "jobMoved": "Akazi {jobNumber} kageze kuri {status}"
+    },
     "statuses": {
       "pending": "Itegereje",
       "diagnosed": "Yasuzumwe",
@@ -177,9 +201,30 @@
     "title": "Igenamiterere",
     "profile": "Umwirondoro",
     "users": "Abakoresha",
+    "manageUsers": "Genzura abakozi, inshingano, n'uburenganzira",
     "general": "Rusange",
+    "generalDesc": "Amakuru y'ubucuruzi n'igenamiterere rusange",
     "language": "Ururimi",
-    "changeLanguage": "Hindura Ururimi"
+    "changeLanguage": "Hindura Ururimi",
+    "comingSoon": "Biraza Vuba",
+    "configure": "Gena",
+    "cards": {
+      "notifications": "Imenyekanisha",
+      "notificationsDesc": "Gena imenyekanisha n'integuza",
+      "security": "Umutekano",
+      "securityDesc": "Amategeko y'ijambo ryibanga n'umutekano",
+      "appearance": "Isura",
+      "appearanceDesc": "Hindura insanganyamatsiko n'imiterere",
+      "database": "Ububiko",
+      "databaseDesc": "Kubika, kugarura, no gucunga amakuru"
+    },
+    "quickTips": {
+      "title": "Inama",
+      "tip1": "Ongeramo abakamyi n'abakozi mu icungamutungo rya abakoresha",
+      "tip2": "Gena uburyo bwo kumenyeshwa ibintu by'ingenzi",
+      "tip3": "Gutubika ububiko buri gihe biremewe",
+      "tip4": "Vugurura umutekano kugira ngo urinde amakuru yawe"
+    }
   },
   "auth": {
     "login": "Injira",

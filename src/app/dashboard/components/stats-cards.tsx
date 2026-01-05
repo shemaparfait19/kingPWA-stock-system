@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, DollarSign, Wrench } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export function StatsCards() {
+  const t = useTranslations('dashboard.stats');
+  const tCommon = useTranslations('common');
   const [stats, setStats] = useState({
     todaySales: 0,
     repairRevenue: 0,
@@ -37,22 +40,22 @@ export function StatsCards() {
 
   const statsData = [
     {
-      title: "Today's Sales",
+      title: t('todaySales'),
       value: stats.todaySales,
       icon: DollarSign,
-      description: 'Total revenue from sales',
+      description: t('todaySalesDesc'),
     },
     {
-      title: 'Repair Revenue',
+      title: t('repairRevenue'),
       value: stats.repairRevenue,
       icon: Wrench,
-      description: 'Total revenue from repairs',
+      description: t('repairRevenueDesc'),
     },
     {
-      title: 'Net Profit',
+      title: t('netProfit'),
       value: stats.netProfit,
       icon: Activity,
-      description: 'Total profit after costs',
+      description: t('netProfitDesc'),
     },
   ];
 
@@ -66,7 +69,7 @@ export function StatsCards() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? '...' : formatCurrency(stat.value)}
+              {loading ? tCommon('loading') + '...' : formatCurrency(stat.value)}
             </div>
             <p className="text-xs text-muted-foreground">
               {stat.description}
