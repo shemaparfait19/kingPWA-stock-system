@@ -4,20 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Users, Bell, Lock, Palette, Database, Settings as SettingsIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const t = useTranslations('settings');
 
   const settingsCards = [
     {
-      title: 'User Management',
+      title: t('users'),
       description: 'Manage staff accounts, roles, and permissions',
       icon: Users,
       color: 'from-blue-500 to-blue-600',
       path: '/settings/users',
     },
     {
-      title: 'Notifications',
+      title: 'Notifications', // TODO: Add to translation file
       description: 'Configure push notifications and alerts',
       icon: Bell,
       color: 'from-green-500 to-green-600',
@@ -25,7 +27,7 @@ export default function SettingsPage() {
       comingSoon: true,
     },
     {
-      title: 'Security',
+      title: 'Security', // TODO: Add to translation file
       description: 'Password policies and security settings',
       icon: Lock,
       color: 'from-purple-500 to-purple-600',
@@ -33,7 +35,7 @@ export default function SettingsPage() {
       comingSoon: true,
     },
     {
-      title: 'Appearance',
+      title: 'Appearance', // TODO: Add to translation file
       description: 'Customize theme and display preferences',
       icon: Palette,
       color: 'from-pink-500 to-pink-600',
@@ -41,7 +43,7 @@ export default function SettingsPage() {
       comingSoon: true,
     },
     {
-      title: 'Database',
+      title: 'Database', // TODO: Add to translation file
       description: 'Backup, restore, and data management',
       icon: Database,
       color: 'from-orange-500 to-orange-600',
@@ -49,7 +51,7 @@ export default function SettingsPage() {
       comingSoon: true,
     },
     {
-      title: 'General',
+      title: t('general'),
       description: 'Business information and general settings',
       icon: SettingsIcon,
       color: 'from-gray-500 to-gray-600',
@@ -61,9 +63,9 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
         <p className="text-muted-foreground">
-          Manage your application settings and preferences
+          {t('title') === 'Igenamiterere' ? 'Genzura igenamiterere rya porogaramu' : 'Manage your application settings and preferences'}
         </p>
       </div>
 

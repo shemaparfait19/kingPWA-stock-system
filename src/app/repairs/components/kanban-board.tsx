@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { RepairCard } from './repair-card';
 import { Wrench } from 'lucide-react';
 import type { RepairStatus } from '@prisma/client';
+import { useTranslations } from 'next-intl';
 
 interface KanbanBoardProps {
   repairs: any[];
@@ -13,15 +14,18 @@ interface KanbanBoardProps {
   onStatusUpdate: () => void;
 }
 
-const columns: { status: RepairStatus; label: string; color: string }[] = [
-  { status: 'pending', label: 'Pending', color: 'bg-gray-100' },
-  { status: 'diagnosed', label: 'Diagnosed', color: 'bg-blue-100' },
-  { status: 'in_progress', label: 'In Progress', color: 'bg-yellow-100' },
-  { status: 'ready', label: 'Ready', color: 'bg-green-100' },
-  { status: 'collected', label: 'Collected', color: 'bg-purple-100' },
-];
-
 export function KanbanBoard({ repairs, loading, onStatusUpdate }: KanbanBoardProps) {
+  const t = useTranslations('repairs.statuses');
+  const tCommon = useTranslations('common');
+
+  const columns: { status: RepairStatus; label: string; color: string }[] = [
+    { status: 'pending', label: t('pending'), color: 'bg-gray-100' },
+    { status: 'diagnosed', label: t('diagnosed'), color: 'bg-blue-100' },
+    { status: 'in_progress', label: t('in_progress'), color: 'bg-yellow-100' },
+    { status: 'ready', label: t('ready'), color: 'bg-green-100' },
+    { status: 'collected', label: t('collected'), color: 'bg-purple-100' },
+  ];
+
   const getRepairsByStatus = (status: RepairStatus) => {
     return repairs.filter((r) => r.status === status);
   };
@@ -29,7 +33,7 @@ export function KanbanBoard({ repairs, loading, onStatusUpdate }: KanbanBoardPro
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading repairs...</p>
+        <p className="text-muted-foreground">{tCommon('loading')}...</p>
       </div>
     );
   }
@@ -53,7 +57,7 @@ export function KanbanBoard({ repairs, loading, onStatusUpdate }: KanbanBoardPro
                   {columnRepairs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <Wrench className="h-8 w-8 mb-2 opacity-50" />
-                      <p className="text-sm">No jobs</p>
+                      <p className="text-sm">No jobs</p> {/* TODO: Add translation term */}
                     </div>
                   ) : (
                     columnRepairs.map((repair) => (

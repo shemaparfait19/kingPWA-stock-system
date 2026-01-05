@@ -15,7 +15,9 @@
     "back": "Subira inyuma",
     "close": "Funga",
     "confirm": "Emeza",
-    "submit": "Ohereza"
+    "start": "Tangira",
+    "complete": "Soza",
+    "new": "Gishya"
   },
   "nav": {
     "dashboard": "Ibanze",
@@ -106,6 +108,32 @@
       "ready": "Byiteguye",
       "collected": "Byakuwe",
       "abandoned": "Byatereranijwe"
+    },
+    "form": {
+      "title": "Akazi Gashya ko Gusana",
+      "customer": "Umukiriya",
+      "searchCustomer_placeholder": "Shakisha umukiriya...",
+      "newCustomer": "Umukiriya Mushya",
+      "customerName": "Izina ry'Umukiriya",
+      "phoneNumber": "Numero ya Telefoni",
+      "deviceType": "Ubwoko bw'Igikoresho",
+      "brand": "Ikirango",
+      "model": "Icyitegererezo",
+      "serialNumber": "Numero ya Seriye",
+      "imei": "IMEI",
+      "problemDescription": "Ikibazo",
+      "problemDescription_placeholder": "Sobanura ikibazo...",
+      "promisedDate": "Itariki Yasezeranijwe",
+      "priority": "Ibyibanze",
+      "priorities": {
+        "normal": "Bisanzwe",
+        "urgent": "Byihutirwa",
+        "express": "Icyitabwaho"
+      },
+      "deposit": "Imbere",
+      "assignTo": "Ha Umukorikori",
+      "selectTechnician": "Hitamo umukorikori (ubishatse)",
+      "submit": "Kora Akazi ko Gusana"
     }
   },
   "sales": {
@@ -122,6 +150,22 @@
     "total": "Igiteranyo Rusange",
     "paymentMethod": "Uburyo bwo Kwishyura",
     "paymentStatus": "Imiterere y'Ubwishyu",
+    "products": "Ibicuruzwa",
+    "searchPlaceholder": "Shakisha mu izina, kode, cyangwa barcode...",
+    "stock": "Ububiko",
+    "cart": "Igikapu",
+    "cartEmpty": "Igikapu kirimo ubusa",
+    "completeSale": "Emeza Igurisha",
+    "paymentMethods": {
+      "cash": "Amafaranga Agashitse",
+      "card": "Ikarita",
+      "mobile_money": "Amafaranga ya Telefoni",
+      "bank_transfer": "Kohereza muri Banki",
+      "credit": "Ideni",
+      "momo_mtn": "MTN MoMo",
+      "momo_airtel": "Airtel Money",
+      "bank": "Kohereza muri Banki"
+    },
     "methods": {
       "cash": "Amafaranga Agashitse",
       "card": "Ikarita",

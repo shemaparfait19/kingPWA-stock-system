@@ -54,6 +54,7 @@ export default function InventoryPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         type={selectedType}
+        onSuccess={() => setDialogOpen(false)}
       />
     </div>
   );

@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { useAuth } from '@/app/components/auth-provider';
 import { canDeleteCustomers } from '@/lib/permissions';
+import { useTranslations } from 'next-intl';
 
 interface CustomerTableProps {
   customers: any[];
@@ -31,23 +32,18 @@ const customerTypeColors = {
   corporate: 'bg-green-500',
 };
 
-const customerTypeLabels = {
-  walk_in: 'Walk-in',
-  regular: 'Regular',
-  vip: 'VIP',
-  corporate: 'Corporate',
-};
-
 export function CustomerTable({ customers, loading, onUpdate }: CustomerTableProps) {
   const router = useRouter();
   const { user } = useAuth();
   const canDelete = canDeleteCustomers(user?.role);
+  const t = useTranslations('customers');
+  const tCommon = useTranslations('common');
 
   if (loading) {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">Loading customers...</p>
+          <p className="text-center text-muted-foreground">{tCommon('loading')}...</p>
         </CardContent>
       </Card>
     );
@@ -59,20 +55,20 @@ export function CustomerTable({ customers, loading, onUpdate }: CustomerTablePro
         {customers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
             <User className="h-12 w-12 mb-4 opacity-50" />
-            <p>No customers found</p>
+            <p>{t('noCustomers')}</p>
           </div>
         ) : (
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Total Spent</TableHead>
-                  <TableHead>Loyalty Points</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('name')}</TableHead>
+                  <TableHead>{t('phone')}</TableHead>
+                  <TableHead>{t('email')}</TableHead>
+                  <TableHead>{t('type')}</TableHead>
+                  <TableHead>{t('totalSpent')}</TableHead>
+                  <TableHead>{t('loyaltyPoints')}</TableHead>
+                  <TableHead className="text-right">{tCommon('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -87,7 +83,7 @@ export function CustomerTable({ customers, loading, onUpdate }: CustomerTablePro
                     <TableCell>{customer.email || '-'}</TableCell>
                     <TableCell>
                       <Badge className={customerTypeColors[customer.customerType as keyof typeof customerTypeColors]}>
-                        {customerTypeLabels[customer.customerType as keyof typeof customerTypeLabels]}
+                        {t(`types.${customer.customerType}` as any)}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
@@ -110,7 +106,7 @@ export function CustomerTable({ customers, loading, onUpdate }: CustomerTablePro
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           onClick={async (e) => {
                             e.stopPropagation();
-                            if(confirm('Are you sure you want to delete this customer?')) {
+                            if(confirm(tCommon('confirm') + '?')) { // Simplified confirm for now
                                 try {
                                     const res = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' });
                                     if(res.ok) {

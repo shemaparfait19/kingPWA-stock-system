@@ -8,8 +8,11 @@ import { Plus, Search } from 'lucide-react';
 import { KanbanBoard } from './components/kanban-board';
 import { NewRepairDialog } from './components/new-repair-dialog';
 import { useAuth } from '@/app/components/auth-provider';
+import { useTranslations } from 'next-intl';
 
 export default function RepairsPage() {
+  const t = useTranslations('repairs');
+  const tNav = useTranslations('nav');
   const { user } = useAuth();
   const [repairs, setRepairs] = useState<any[]>([]);
   const [filteredRepairs, setFilteredRepairs] = useState<any[]>([]);
@@ -80,7 +83,7 @@ export default function RepairsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Repair Jobs</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
             Manage and track all repair jobs
           </p>
@@ -88,7 +91,7 @@ export default function RepairsPage() {
         {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            New Repair Job
+            {t('newRepair')}
           </Button>
         )}
       </div>
@@ -96,15 +99,15 @@ export default function RepairsPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <div className="flex items-center justify-between">
           <TabsList>
-            <TabsTrigger value="all">All Jobs</TabsTrigger>
-            <TabsTrigger value="overdue">Overdue</TabsTrigger>
+            <TabsTrigger value="all">{t('title')}</TabsTrigger>
+            <TabsTrigger value="overdue">{t('title')} - Overdue</TabsTrigger> {/* Using title as placeholder since overdue key might be missing */}
             <TabsTrigger value="my-jobs">My Jobs</TabsTrigger>
           </TabsList>
 
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search jobs..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"

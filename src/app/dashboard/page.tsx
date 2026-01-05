@@ -2,6 +2,7 @@ import { StatsCards } from './components/stats-cards';
 import { AttentionNeeded } from './components/attention-needed';
 import { RepairStatus } from './components/repair-status';
 import { RecentRepairs } from './components/recent-repairs';
+import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
   return (

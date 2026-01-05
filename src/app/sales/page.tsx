@@ -20,8 +20,10 @@ import { useRouter } from 'next/navigation';
 import { CustomerSearch } from './components/customer-search';
 import { InvoiceDialog } from './components/invoice-dialog';
 import { canManageSales } from '@/lib/permissions';
+import { useTranslations } from 'next-intl';
 
 export default function SalesPage() {
+  const t = useTranslations('sales');
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
@@ -164,7 +166,7 @@ export default function SalesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Sales</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
             Manage sales and invoices
           </p>
@@ -172,7 +174,7 @@ export default function SalesPage() {
         {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
           <Button onClick={() => setShowInvoice(true)}> {/* Assuming setDialogOpen refers to setShowInvoice for consistency with the page's state */}
             <Plus className="mr-2 h-4 w-4" />
-            New Sale
+            {t('newSale')}
           </Button>
         )}
       </div>
@@ -181,13 +183,13 @@ export default function SalesPage() {
         {/* Product Search */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Products</CardTitle>
+            <CardTitle>{t('products')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products by name, SKU, or barcode..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -208,7 +210,7 @@ export default function SalesPage() {
                       <p className="font-bold text-primary">
                         {formatCurrency(item.sellingPrice)}
                       </p>
-                      <p className="text-xs">Stock: {item.quantity}</p>
+                      <p className="text-xs">{t('stock')}: {item.quantity}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -222,7 +224,7 @@ export default function SalesPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              Cart ({cart.length} items)
+              {t('cart')} ({cart.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -236,7 +238,7 @@ export default function SalesPage() {
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {cart.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
-                  Cart is empty
+                  {t('cartEmpty')}
                 </p>
               ) : (
                 cart.map((item) => (
@@ -276,32 +278,32 @@ export default function SalesPage() {
             {/* Totals */}
             <div className="space-y-2 border-t pt-4">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
+                <span>{t('subtotal')}:</span>
                 <span className="font-medium">{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Tax:</span>
+                <span>{t('tax')}:</span>
                 <span className="font-medium">{formatCurrency(tax)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold">
-                <span>Total:</span>
+                <span>{t('total')}:</span>
                 <span>{formatCurrency(total)}</span>
               </div>
             </div>
 
             {/* Payment Method */}
             <div className="space-y-2">
-              <Label htmlFor="payment-method">Payment Method</Label>
+              <Label htmlFor="payment-method">{t('paymentMethod')}</Label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                 <SelectTrigger id="payment-method">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="cash">{t('paymentMethods.cash')}</SelectItem>
                   <SelectItem value="momo_mtn">MTN MoMo</SelectItem>
                   <SelectItem value="momo_airtel">Airtel Money</SelectItem>
-                  <SelectItem value="bank">Bank Transfer</SelectItem>
-                  <SelectItem value="credit">Credit</SelectItem>
+                  <SelectItem value="bank">{t('paymentMethods.bank')}</SelectItem>
+                  <SelectItem value="credit">{t('paymentMethods.credit')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -313,7 +315,7 @@ export default function SalesPage() {
               className="w-full"
               size="lg"
             >
-              {loading ? 'Processing...' : `Complete Sale - ${formatCurrency(total)}`}
+              {loading ? 'Processing...' : `${t('completeSale')} - ${formatCurrency(total)}`}
             </Button>
           </CardContent>
         </Card>

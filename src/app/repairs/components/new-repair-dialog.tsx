@@ -16,6 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/app/components/auth-provider';
 import { Search, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface NewRepairDialogProps {
   open: boolean;
@@ -24,6 +25,8 @@ interface NewRepairDialogProps {
 }
 
 export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDialogProps) {
+  const t = useTranslations('repairs.form');
+  const tCommon = useTranslations('common');
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -188,18 +191,18 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New Repair Job</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Customer Selection */}
           <div className="space-y-2">
-            <Label>Customer *</Label>
+            <Label>{t('customer')} *</Label>
             {!showNewCustomer ? (
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search customer by name or phone..."
+                    placeholder={t('searchCustomer_placeholder')}
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
                     className="pl-10"
@@ -211,30 +214,30 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
                   onClick={() => setShowNewCustomer(true)}
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  New
+                  {tCommon('new')}
                 </Button>
               </div>
             ) : (
               <div className="space-y-2 p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <Label>New Customer</Label>
+                  <Label>{t('newCustomer')}</Label>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowNewCustomer(false)}
                   >
-                    Cancel
+                    {tCommon('cancel')}
                   </Button>
                 </div>
                 <Input
-                  placeholder="Customer Name"
+                  placeholder={t('customerName')}
                   value={formData.customerName}
                   onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
                   required
                 />
                 <Input
-                  placeholder="Phone Number"
+                  placeholder={t('phoneNumber')}
                   value={formData.customerPhone}
                   onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
                   required
@@ -264,7 +267,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           {/* Device Details */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="deviceType">Device Type *</Label>
+              <Label htmlFor="deviceType">{t('deviceType')} *</Label>
               <Input
                 id="deviceType"
                 placeholder="e.g., Laptop, Phone, Tablet"
@@ -275,7 +278,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="brand">Brand *</Label>
+              <Label htmlFor="brand">{t('brand')} *</Label>
               <Input
                 id="brand"
                 placeholder="e.g., HP, Samsung, Apple"
@@ -289,7 +292,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="model">Model *</Label>
+              <Label htmlFor="model">{t('model')} *</Label>
               <Input
                 id="model"
                 placeholder="e.g., Galaxy S21, MacBook Pro"
@@ -300,7 +303,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="serialNumber">Serial Number</Label>
+              <Label htmlFor="serialNumber">{t('serialNumber')}</Label>
               <Input
                 id="serialNumber"
                 placeholder="Optional"
@@ -312,7 +315,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imei">IMEI (for phones)</Label>
+            <Label htmlFor="imei">{t('imei')}</Label>
             <Input
               id="imei"
               placeholder="Optional"
@@ -324,10 +327,10 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
 
           {/* Problem Description */}
           <div className="space-y-2">
-            <Label htmlFor="problemDescription">Problem Description *</Label>
+            <Label htmlFor="problemDescription">{t('problemDescription')} *</Label>
             <Textarea
               id="problemDescription"
-              placeholder="Describe the issue..."
+              placeholder={t('problemDescription_placeholder')}
               value={formData.problemDescription}
               onChange={(e) => setFormData({ ...formData, problemDescription: e.target.value })}
               required
@@ -339,7 +342,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           {/* Job Details */}
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="promisedDate">Promised Date *</Label>
+              <Label htmlFor="promisedDate">{t('promisedDate')} *</Label>
               <Input
                 id="promisedDate"
                 type="date"
@@ -350,7 +353,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">{t('priority')}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value) => setFormData({ ...formData, priority: value })}
@@ -359,14 +362,14 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
-                  <SelectItem value="express">Express</SelectItem>
+                  <SelectItem value="normal">{t('priorities.normal')}</SelectItem>
+                  <SelectItem value="urgent">{t('priorities.urgent')}</SelectItem>
+                  <SelectItem value="express">{t('priorities.express')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="depositPaid">Deposit (RWF)</Label>
+              <Label htmlFor="depositPaid">{t('deposit')} (RWF)</Label>
               <Input
                 id="depositPaid"
                 type="number"
@@ -380,13 +383,13 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assignedTo">Assign to Technician</Label>
+            <Label htmlFor="assignedTo">{t('assignTo')}</Label>
             <Select
               value={formData.assignedTo}
               onValueChange={(value) => setFormData({ ...formData, assignedTo: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select technician (optional)" />
+                <SelectValue placeholder={t('selectTechnician')} />
               </SelectTrigger>
               <SelectContent>
                 {technicians.map((tech) => (
@@ -405,10 +408,10 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Repair Job'}
+              {loading ? tCommon('loading') + '...' : t('submit')}
             </Button>
           </DialogFooter>
         </form>

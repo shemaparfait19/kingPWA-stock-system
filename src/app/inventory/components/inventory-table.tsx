@@ -20,12 +20,15 @@ import { ItemDialog } from './item-dialog';
 import { StockAdjustmentDialog } from './stock-adjustment-dialog';
 import { useAuth } from '@/app/components/auth-provider';
 import { canDeleteInventory, canEditInventory, hasPermission } from '@/lib/permissions';
+import { useTranslations } from 'next-intl';
 
 interface InventoryTableProps {
   type: InventoryType;
 }
 
 export function InventoryTable({ type }: InventoryTableProps) {
+  const t = useTranslations('inventory');
+  const tCommon = useTranslations('common');
   const [items, setItems] = useState<any[]>([]);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +85,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">Loading inventory...</p>
+          <p className="text-center text-muted-foreground">{tCommon('loading')}...</p>
         </CardContent>
       </Card>
     );
@@ -96,7 +99,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, SKU, or barcode..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -108,7 +111,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
-                {searchQuery ? 'No items found matching your search' : 'No items in inventory yet'}
+                {searchQuery ? t('noItemsFound') : t('noItems')}
               </p>
             </div>
           ) : (
@@ -116,14 +119,14 @@ export function InventoryTable({ type }: InventoryTableProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>SKU</TableHead>
-                    <TableHead>Stock Level</TableHead>
-                    {showCostPrice && <TableHead>Unit Cost</TableHead>}
-                    <TableHead>Selling Price</TableHead>
-                    <TableHead>Reorder Level</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Name</TableHead> {/* TODO: Add 'name' to translations if missing, or use common term */}
+                    <TableHead>{t('sku')}</TableHead>
+                    <TableHead>{t('stockLevel')}</TableHead>
+                    {showCostPrice && <TableHead>{t('unitCost')}</TableHead>}
+                    <TableHead>{t('sellingPrice')}</TableHead>
+                    <TableHead>{t('reorderLevel')}</TableHead>
+                    <TableHead>{t('location')}</TableHead>
+                    <TableHead className="text-right">{tCommon('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -157,7 +160,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
                                 onClick={() => setAdjustItem(item)}
                               >
                                 <Package className="h-4 w-4 mr-1" />
-                                Adjust
+                                {t('adjust')}
                               </Button>
                             )}
                             {canEdit && (
@@ -167,7 +170,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
                                 onClick={() => setEditItem(item)}
                               >
                                 <Edit className="h-4 w-4 mr-1" />
-                                Edit
+                                {tCommon('edit')}
                               </Button>
                             )}
                             {canDelete && (
