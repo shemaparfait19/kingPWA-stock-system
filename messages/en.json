@@ -235,5 +235,38 @@
     "forgotPassword": "Forgot Password?",
     "signIn": "Sign In",
     "signOut": "Sign Out"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "description": "Schedule and manage customer appointments",
+    "newAppointment": "New Appointment",
+    "upcoming": "Upcoming Appointments",
+    "past": "Past Appointments",
+    "searchPlaceholder": "Search appointments by title or customer...",
+    "loading": "Loading appointments...",
+    "noUpcoming": "No upcoming appointments",
+    "scheduleFirst": "Schedule First Appointment",
+    "statuses": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No Show"
+    },
+    "form": {
+      "title": "Appointment",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g., Diagnosis, Repair Pickup, etc.",
+      "customer": "Customer",
+      "customerPlaceholder": "Select a customer...",
+      "date": "Date & Time",
+      "duration": "Duration (minutes)",
+      "description": "Description",
+      "descriptionPlaceholder": "Additional details...",
+      "status": "Status",
+      "save": "Save Appointment",
+      "cancel": "Cancel",
+      "success": "Appointment saved!",
+      "error": "Failed to save appointment"
+    }
   }
 }

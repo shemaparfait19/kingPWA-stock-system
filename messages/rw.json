@@ -235,5 +235,38 @@
     "forgotPassword": "Wibagiwe Ijambo Ryibanga?",
     "signIn": "Injira",
     "signOut": "Sohoka"
+  },
+  "appointments": {
+    "title": "Gahunda",
+    "description": "Gena kandi ugenzure gahunda z'abakiriya",
+    "newAppointment": "Gahunda Nshya",
+    "upcoming": "Gahunda Ziri Imbere",
+    "past": "Gahunda Zahise",
+    "searchPlaceholder": "Shakisha gahunda mu izina cyangwa umukiriya...",
+    "loading": "Gahunda zirimo gushakwa...",
+    "noUpcoming": "Nta gahunda ziri imbere",
+    "scheduleFirst": "Gena Gahunda ya Mbere",
+    "statuses": {
+      "scheduled": "Biteganijwe",
+      "completed": "Byarangiye",
+      "cancelled": "Byahagaritswe",
+      "no_show": "Ntabwo yabonetse"
+    },
+    "form": {
+      "title": "Gahunda",
+      "titleLabel": "Umutwe",
+      "titlePlaceholder": "Urugero: Isuzuma, Gusana, etc.",
+      "customer": "Umukiriya",
+      "customerPlaceholder": "Hitamo umukiriya...",
+      "date": "Itariki n'Igihe",
+      "duration": "Igihe (iminota)",
+      "description": "Ibisobanuro",
+      "descriptionPlaceholder": "Ibisobanuro birambuye...",
+      "status": "Imiterere",
+      "save": "Bika Gahunda",
+      "cancel": "Hagarika",
+      "success": "Gahunda yabitswe!",
+      "error": "Habaye ikibazo mu kubika gahunda"
+    }
   }
 }

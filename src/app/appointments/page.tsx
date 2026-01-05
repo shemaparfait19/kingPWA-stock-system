@@ -9,8 +9,10 @@ import { Calendar as CalendarIcon, Plus, Clock, User, Search } from 'lucide-reac
 import { formatDateTime } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { AppointmentDialog } from './components/appointment-dialog';
+import { useTranslations } from 'next-intl';
 
 export default function AppointmentsPage() {
+  const t = useTranslations('appointments');
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
@@ -97,14 +99,14 @@ export default function AppointmentsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Appointments</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Schedule and manage customer appointments
+            {t('description')}
           </p>
         </div>
         <Button onClick={handleNew}>
           <Plus className="mr-2 h-4 w-4" />
-          New Appointment
+          {t('newAppointment')}
         </Button>
       </div>
 
@@ -114,7 +116,7 @@ export default function AppointmentsPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search appointments by title or customer..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -128,21 +130,21 @@ export default function AppointmentsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
-            Upcoming Appointments ({upcomingAppointments.length})
+            {t('upcoming')} ({upcomingAppointments.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <p className="text-center text-muted-foreground py-8">
-              Loading appointments...
+              {t('loading')}
             </p>
           ) : upcomingAppointments.length === 0 ? (
             <div className="text-center py-12">
               <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground mb-4">No upcoming appointments</p>
+              <p className="text-muted-foreground mb-4">{t('noUpcoming')}</p>
               <Button variant="outline" onClick={handleNew}>
                 <Plus className="mr-2 h-4 w-4" />
-                Schedule First Appointment
+                {t('scheduleFirst')}
               </Button>
             </div>
           ) : (
@@ -157,7 +159,7 @@ export default function AppointmentsPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold">{appointment.title}</h3>
                       <Badge className={getStatusColor(appointment.status)}>
-                        {appointment.status}
+                        {t(`statuses.${appointment.status}`)}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -191,7 +193,7 @@ export default function AppointmentsPage() {
       {pastAppointments.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Past Appointments ({pastAppointments.length})</CardTitle>
+            <CardTitle>{t('past')} ({pastAppointments.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -205,7 +207,7 @@ export default function AppointmentsPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold">{appointment.title}</h3>
                       <Badge className={getStatusColor(appointment.status)}>
-                        {appointment.status}
+                        {t(`statuses.${appointment.status}`)}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
