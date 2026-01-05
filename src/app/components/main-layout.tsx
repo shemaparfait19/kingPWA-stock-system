@@ -79,7 +79,7 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
-        <Sidebar collapsible="icon" className="bg-background hidden md:flex border-r">
+        <Sidebar collapsible="icon" className="bg-background border-r">
           {/* ... existing Sidebar content ... */}
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
@@ -135,10 +135,7 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
 
         <SidebarInset className="flex w-full flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
-            {/* Hide SidebarTrigger on mobile since we have bottom nav */}
-            <div className="hidden md:block">
-              <SidebarTrigger />
-            </div>
+            <SidebarTrigger />
             
             <div className="flex-1 overflow-hidden">
               <h1 className="text-lg font-semibold truncate">
