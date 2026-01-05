@@ -34,6 +34,7 @@ export default async function RootLayout({
         />
         {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
         <meta name="theme-color" content="#3b82f6" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
