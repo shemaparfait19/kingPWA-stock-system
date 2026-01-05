@@ -71,34 +71,36 @@ export function RecentRepairs() {
             {tRepairs('noRepairs')}
           </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tRepairs('jobNumber')}</TableHead>
-                <TableHead>{tRepairs('customer')}</TableHead>
-                <TableHead>{tRepairs('device')}</TableHead>
-                <TableHead>{tCommon('status')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {repairs.map((repair) => (
-                <TableRow 
-                  key={repair.id}
-                  className="cursor-pointer hover:bg-accent"
-                  onClick={() => router.push(`/repairs/${repair.id}`)}
-                >
-                  <TableCell className="font-medium">{repair.jobNumber}</TableCell>
-                  <TableCell>{repair.customer.name}</TableCell>
-                  <TableCell>{repair.deviceType} - {repair.brand}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(repair.status)}>
-                      {tRepairs(`statuses.${repair.status}`)}
-                    </Badge>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{tRepairs('jobNumber')}</TableHead>
+                  <TableHead>{tRepairs('customer')}</TableHead>
+                  <TableHead>{tRepairs('device')}</TableHead>
+                  <TableHead>{tCommon('status')}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {repairs.map((repair) => (
+                  <TableRow 
+                    key={repair.id}
+                    className="cursor-pointer hover:bg-accent"
+                    onClick={() => router.push(`/repairs/${repair.id}`)}
+                  >
+                    <TableCell className="font-medium">{repair.jobNumber}</TableCell>
+                    <TableCell>{repair.customer.name}</TableCell>
+                    <TableCell>{repair.deviceType} - {repair.brand}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(repair.status)}>
+                        {tRepairs(`statuses.${repair.status}`)}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
