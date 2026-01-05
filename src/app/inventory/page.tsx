@@ -9,8 +9,10 @@ import { ItemDialog } from './components/item-dialog';
 
 import { useAuth } from '@/app/components/auth-provider';
 import { canCreateInventory } from '@/lib/permissions';
+import { useTranslations } from 'next-intl';
 
 export default function InventoryPage() {
+  const t = useTranslations('inventory');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'SHOP' | 'REPAIR'>('SHOP');
   const { user } = useAuth();
@@ -23,23 +25,20 @@ export default function InventoryPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Inventory Management</h2>
-          <p className="text-muted-foreground">
-            Manage shop stock and repair parts inventory
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
         </div>
         {canCreateInventory(user?.role) && (
           <Button onClick={handleAddItem}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Item
+            {t('addItem')}
           </Button>
         )}
       </div>
 
       <Tabs defaultValue="shop" className="space-y-4" onValueChange={(v) => setSelectedType(v as any)}>
         <TabsList>
-          <TabsTrigger value="shop">Shop Stock</TabsTrigger>
-          <TabsTrigger value="repair">Repair Parts</TabsTrigger>
+          <TabsTrigger value="shop">{t('title')} - Shop</TabsTrigger>
+          <TabsTrigger value="repair">{t('title')} - Repair</TabsTrigger>
         </TabsList>
 
         <TabsContent value="shop" className="space-y-4">

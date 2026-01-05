@@ -36,36 +36,44 @@ import {
   canViewReports,
   canManageUsers
 } from '@/lib/permissions';
+import { useTranslations } from 'next-intl';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/repairs', label: 'Repairs', icon: Wrench },
-  { href: '/inventory', label: 'Inventory', icon: Boxes },
-  { href: '/customers', label: 'Customers', icon: Users },
-  { href: '/sales', label: 'Sales (POS)', icon: ShoppingCart },
-  { href: '/appointments', label: 'Appointments', icon: Calendar },
-  { href: '/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/dashboard', label: 'dashboard', icon: LayoutDashboard },
+  { href: '/repairs', label: 'repairs', icon: Wrench },
+  { href: '/inventory', label: 'inventory', icon: Boxes },
+  { href: '/customers', label: 'customers', icon: Users },
+  { href: '/sales', label: 'sales', icon: ShoppingCart },
+  { href: '/appointments', label: 'appointments', icon: Calendar },
+  { href: '/reports', label: 'reports', icon: BarChart3 },
 ];
 
 export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const { user, loading } = useAuth();
   const [headerTitle, setHeaderTitle] = useState('King Service Tech');
 
   // Filter nav items based on permissions
   const visibleNavItems = navItems.filter(item => {
-    if (item.label === 'Reports') {
+    if (item.label === 'reports') {
       return canViewReports(user?.role);
     }
-    // Technicians usually don't need Sales/POS? Or maybe they do for parts?
-    // Letting them see it for now, can restrict later if needed.
     return true; 
   });
 
   useEffect(() => {
+    // Determine title based on current path
     const currentNavItem = navItems.find((item) => pathname.startsWith(item.href));
-    setHeaderTitle(currentNavItem?.label || 'King Service Tech');
-  }, [pathname]);
+    // Translate the title if it matches a nav item, otherwise default string
+    if (currentNavItem) {
+        setHeaderTitle(t(currentNavItem.label as any));
+    } else if (pathname.startsWith('/settings')) {
+        setHeaderTitle(t('settings'));
+    } else {
+        setHeaderTitle('King Service Tech');
+    }
+  }, [pathname, t]);
 
   return (
     <SidebarProvider>
@@ -86,10 +94,10 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
                   <Link href={item.href}>
                     <SidebarMenuButton
                       isActive={pathname.startsWith(item.href)}
-                      tooltip={item.label}
+                      tooltip={t(item.label as any)}
                     >
                       <item.icon />
-                      <span>{item.label}</span>
+                      <span>{t(item.label as any)}</span>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -105,16 +113,16 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
                 </div>
               </SidebarMenuItem>
 
-             {/* Only show Settings if user has management permissions */}
+              {/* Only show Settings if user has management permissions */}
               {hasPermission(user?.role, 'manage_settings') && (
                 <SidebarMenuItem>
                   <Link href="/settings">
                     <SidebarMenuButton
                       isActive={pathname.startsWith('/settings')}
-                      tooltip="Settings"
+                      tooltip={t('settings')}
                     >
                       <Settings />
-                      <span>Settings</span>
+                      <span>{t('settings')}</span>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
