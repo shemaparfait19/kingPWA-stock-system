@@ -71,7 +71,7 @@ export function RecentRepairs() {
             {tRepairs('noRepairs')}
           </p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-w-[calc(100vw-3rem)] md:max-w-full">
             <Table>
               <TableHeader>
                 <TableRow>

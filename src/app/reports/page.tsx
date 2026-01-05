@@ -329,7 +329,7 @@ export default function ReportsPage() {
               </CardHeader>
               <CardContent>
                 {reportData.details && reportData.details.length > 0 ? (
-                  <div className="rounded-md border overflow-x-auto">
+                  <div className="rounded-md border overflow-x-auto max-w-[calc(100vw-3rem)] md:max-w-full">
                     <table className="w-full">
                       <thead className="bg-gray-50">
                         <tr>

@@ -115,7 +115,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
               </p>
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
+            <div className="rounded-md border overflow-x-auto max-w-[calc(100vw-3rem)] md:max-w-full">
               <Table>
                 <TableHeader>
                   <TableRow>
