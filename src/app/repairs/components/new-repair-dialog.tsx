@@ -198,7 +198,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           <div className="space-y-2">
             <Label>{t('customer')} *</Label>
             {!showNewCustomer ? (
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -212,6 +212,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
                   type="button"
                   variant="outline"
                   onClick={() => setShowNewCustomer(true)}
+                  className="w-full md:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   {tCommon('new')}
@@ -230,18 +231,20 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
                     {tCommon('cancel')}
                   </Button>
                 </div>
-                <Input
-                  placeholder={t('customerName')}
-                  value={formData.customerName}
-                  onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                  required
-                />
-                <Input
-                  placeholder={t('phoneNumber')}
-                  value={formData.customerPhone}
-                  onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                  required
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    placeholder={t('customerName')}
+                    value={formData.customerName}
+                    onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                    required
+                  />
+                  <Input
+                    placeholder={t('phoneNumber')}
+                    value={formData.customerPhone}
+                    onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
             )}
 
@@ -265,7 +268,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           </div>
 
           {/* Device Details */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="deviceType">{t('deviceType')} *</Label>
               <Input
@@ -290,7 +293,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="model">{t('model')} *</Label>
               <Input
@@ -340,7 +343,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           </div>
 
           {/* Job Details */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="promisedDate">{t('promisedDate')} *</Label>
               <Input
@@ -401,16 +404,17 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
             </Select>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               {tCommon('cancel')}
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? tCommon('loading') + '...' : t('submit')}
             </Button>
           </DialogFooter>
