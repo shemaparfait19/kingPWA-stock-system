@@ -1,0 +1,149 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "total": "Total",
+    "view": "View",
+    "back": "Back",
+    "close": "Close",
+    "confirm": "Confirm",
+    "submit": "Submit"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "customers": "Customers",
+    "repairs": "Repairs",
+    "sales": "Sales",
+    "settings": "Settings",
+    "reports": "Reports"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "overview": "Overview",
+    "recentActivity": "Recent Activity",
+    "attentionNeeded": "Attention Needed",
+    "lowStock": "Low Stock Items",
+    "overdueRepairs": "Overdue Repairs",
+    "stats": {
+      "totalRevenue": "Total Revenue",
+      "activeRepairs": "Active Repairs",
+      "lowStockItems": "Low Stock Items",
+      "pendingOrders": "Pending Orders"
+    }
+  },
+  "inventory": {
+    "title": "Inventory",
+    "addItem": "Add Item",
+    "stockLevel": "Stock Level",
+    "reorderLevel": "Reorder Level",
+    "unitCost": "Unit Cost",
+    "sellingPrice": "Selling Price",
+    "location": "Location",
+    "sku": "SKU",
+    "barcode": "Barcode",
+    "category": "Category",
+    "quantity": "Quantity",
+    "adjust": "Adjust",
+    "adjustStock": "Adjust Stock",
+    "searchPlaceholder": "Search by name, SKU, or barcode...",
+    "noItems": "No items in inventory yet",
+    "noItemsFound": "No items found matching your search"
+  },
+  "customers": {
+    "title": "Customers",
+    "addCustomer": "Add Customer",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "type": "Customer Type",
+    "notes": "Notes",
+    "totalSpent": "Total Spent",
+    "loyaltyPoints": "Loyalty Points",
+    "searchPlaceholder": "Search by name, phone, or email...",
+    "noCustomers": "No customers found",
+    "types": {
+      "walk_in": "Walk-in",
+      "regular": "Regular",
+      "vip": "VIP",
+      "corporate": "Corporate"
+    }
+  },
+  "repairs": {
+    "title": "Repair Jobs",
+    "newRepair": "New Repair Job",
+    "jobNumber": "Job #",
+    "customer": "Customer",
+    "device": "Device",
+    "deviceType": "Device Type",
+    "brand": "Brand",
+    "model": "Model",
+    "problem": "Problem Description",
+    "diagnosis": "Diagnosis",
+    "parts": "Parts Used",
+    "status": "Status",
+    "priority": "Priority",
+    "estimatedCost": "Estimated Cost",
+    "depositPaid": "Deposit Paid",
+    "promisedDate": "Promised Date",
+    "assignedTo": "Assigned To",
+    "searchPlaceholder": "Search jobs...",
+    "statuses": {
+      "pending": "Pending",
+      "diagnosed": "Diagnosed",
+      "in_progress": "In Progress",
+      "waiting_parts": "Waiting Parts",
+      "ready": "Ready",
+      "collected": "Collected",
+      "abandoned": "Abandoned"
+    }
+  },
+  "sales": {
+    "title": "Sales",
+    "newSale": "New Sale",
+    "pos": "Point of Sale",
+    "history": "Sales History",
+    "invoice": "Invoice",
+    "invoiceNumber": "Invoice #",
+    "items": "Items",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "discount": "Discount",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "paymentStatus": "Payment Status",
+    "methods": {
+      "cash": "Cash",
+      "card": "Card",
+      "mobile_money": "Mobile Money",
+      "bank_transfer": "Bank Transfer"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "users": "Users",
+    "general": "General",
+    "language": "Language",
+    "changeLanguage": "Change Language"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  }
+}

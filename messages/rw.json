@@ -1,0 +1,149 @@
+{
+  "common": {
+    "save": "Bika",
+    "cancel": "Hagarika",
+    "delete": "Siba",
+    "edit": "Hindura",
+    "add": "Ongeraho",
+    "search": "Shakisha",
+    "loading": "Loading",
+    "actions": "Ibikorwa",
+    "status": "Imiterere",
+    "date": "Itariki",
+    "total": "Igiteranyo",
+    "view": "Reba",
+    "back": "Subira inyuma",
+    "close": "Funga",
+    "confirm": "Emeza",
+    "submit": "Ohereza"
+  },
+  "nav": {
+    "dashboard": "Ibanze",
+    "inventory": "Ibicuruzwa",
+    "customers": "Abakiriya",
+    "repairs": "Gusana",
+    "sales": "Kugurisha",
+    "settings": "Igenamiterere",
+    "reports": "Raporo"
+  },
+  "dashboard": {
+    "title": "Ibanze",
+    "welcome": "Murakaza neza",
+    "overview": "Incamake",
+    "recentActivity": "Ibikorwa Biheruka",
+    "attentionNeeded": "Bisaba Kwitabwaho",
+    "lowStock": "Ibicuruzwa Bike",
+    "overdueRepairs": "Gusana Gutinze",
+    "stats": {
+      "totalRevenue": "Amafaranga Yinjije",
+      "activeRepairs": "Gusana Gukomeje",
+      "lowStockItems": "Ibicuruzwa Bike",
+      "pendingOrders": "Ibisabwa Bitegereje"
+    }
+  },
+  "inventory": {
+    "title": "Ibicuruzwa",
+    "addItem": "Ongeraho Igicuruzwa",
+    "stockLevel": "Umubare mu Bubiko",
+    "reorderLevel": "Umubare wo Kongera Gutumiza",
+    "unitCost": "Ikiguzi cy'Igice Kimwe",
+    "sellingPrice": "Ikiguzi cyo Kugurisha",
+    "location": "Aho Bibitse",
+    "sku": "Kode y'Igicuruzwa",
+    "barcode": "Barcode",
+    "category": "Icyiciro",
+    "quantity": "Umubare",
+    "adjust": "Hindura",
+    "adjustStock": "Hindura Umubare",
+    "searchPlaceholder": "Shakisha mu izina, kode, cyangwa barcode...",
+    "noItems": "Nta bicuruzwa",
+    "noItemsFound": "Nta gicuruzwa cyabonetse"
+  },
+  "customers": {
+    "title": "Abakiriya",
+    "addCustomer": "Ongeramo Umukiriya",
+    "name": "Izina",
+    "phone": "Telefoni",
+    "email": "Imeri",
+    "address": "Aderesi",
+    "type": "Ubwoko bw'Umukiriya",
+    "notes": "Ibisobanuro",
+    "totalSpent": "Amafaranga Yose Yakoresheje",
+    "loyaltyPoints": "Amanota y'Ubudahemuka",
+    "searchPlaceholder": "Shakisha mu izina, telefoni, cyangwa imeri...",
+    "noCustomers": "Nta bakiriya babonetse",
+    "types": {
+      "walk_in": "Umukiriya w'Akadiho",
+      "regular": "Umukiriya Usanzwe",
+      "vip": "Umukiriya Wihariye",
+      "corporate": "Ikigo"
+    }
+  },
+  "repairs": {
+    "title": "Gusana",
+    "newRepair": "Akazi Gashya ko Gusana",
+    "jobNumber": "Nomero y'Akazi",
+    "customer": "Umukiriya",
+    "device": "Igikoresho",
+    "deviceType": "Ubwoko bw'Igikoresho",
+    "brand": "Ikirango",
+    "model": "Icyitegererezo",
+    "problem": "Ikibazo",
+    "diagnosis": "Isuzuma",
+    "parts": "Ibikoresho Byakoreshejwe",
+    "status": "Imiterere",
+    "priority": "Ibyibanze",
+    "estimatedCost": "Ikiguzi Giteganijwe",
+    "depositPaid": "Imbere Yishyuwe",
+    "promisedDate": "Itariki Yasezeranijwe",
+    "assignedTo": "Yahawe",
+    "searchPlaceholder": "Shakisha imirimo...",
+    "statuses": {
+      "pending": "Itegereje",
+      "diagnosed": "Yasuzumwe",
+      "in_progress": "Irimo Gukorwa",
+      "waiting_parts": "Itegereje Ibice",
+      "ready": "Byiteguye",
+      "collected": "Byakuwe",
+      "abandoned": "Byatereranijwe"
+    }
+  },
+  "sales": {
+    "title": "Kugurisha",
+    "newSale": "Igurisha Rishya",
+    "pos": "Igurisha",
+    "history": "Amateka y'Igurisha",
+    "invoice": "Inyemezabuguzi",
+    "invoiceNumber": "Nomero y'Inyemezabuguzi",
+    "items": "Ibintu",
+    "subtotal": "Igiteranyo",
+    "tax": "Imisoro",
+    "discount": "Kugabanuka",
+    "total": "Igiteranyo Rusange",
+    "paymentMethod": "Uburyo bwo Kwishyura",
+    "paymentStatus": "Imiterere y'Ubwishyu",
+    "methods": {
+      "cash": "Amafaranga Agashitse",
+      "card": "Ikarita",
+      "mobile_money": "Amafaranga ya Telefoni",
+      "bank_transfer": "Kohereza muri Banki"
+    }
+  },
+  "settings": {
+    "title": "Igenamiterere",
+    "profile": "Umwirondoro",
+    "users": "Abakoresha",
+    "general": "Rusange",
+    "language": "Ururimi",
+    "changeLanguage": "Hindura Ururimi"
+  },
+  "auth": {
+    "login": "Injira",
+    "logout": "Sohoka",
+    "email": "Imeri",
+    "password": "Ijambo Ryibanga",
+    "forgotPassword": "Wibagiwe Ijambo Ryibanga?",
+    "signIn": "Injira",
+    "signOut": "Sohoka"
+  }
+}

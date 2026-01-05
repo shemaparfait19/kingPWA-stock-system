@@ -114,3 +114,7 @@ export function canEditRepairDetails(role: string | undefined) {
 export function canDeleteSales(role: string | undefined) {
   return hasPermission(role, 'delete_sales');
 }
+
+export function canDeleteRepairs(role: string | undefined) {
+  return hasPermission(role, 'delete_repairs');
+}

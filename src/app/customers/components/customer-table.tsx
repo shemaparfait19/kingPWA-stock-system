@@ -13,9 +13,30 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, User } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { useAuth } from '@/app/components/auth-provider';
 import { canDeleteCustomers } from '@/lib/permissions';
+
+interface CustomerTableProps {
+  customers: any[];
+  loading: boolean;
+  onUpdate: () => void;
+}
+
+const customerTypeColors = {
+  walk_in: 'bg-gray-500',
+  regular: 'bg-blue-500',
+  vip: 'bg-purple-500',
+  corporate: 'bg-green-500',
+};
+
+const customerTypeLabels = {
+  walk_in: 'Walk-in',
+  regular: 'Regular',
+  vip: 'VIP',
+  corporate: 'Corporate',
+};
 
 export function CustomerTable({ customers, loading, onUpdate }: CustomerTableProps) {
   const router = useRouter();

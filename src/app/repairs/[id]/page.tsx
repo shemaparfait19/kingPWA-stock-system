@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Camera, FileText, Package, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Camera, FileText, Package, Clock, CheckCircle, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDateTime, getRepairStatusColor, getPriorityColor } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/app/components/auth-provider';
+import { canDeleteRepairs } from '@/lib/permissions';
 import { RepairTimeline } from './components/repair-timeline';
 import { DiagnosisForm } from './components/diagnosis-form';
 import { PartsUsed } from './components/parts-used';
@@ -26,6 +27,23 @@ export default function RepairDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const canDelete = canDeleteRepairs(user?.role);
+
+  const handleDelete = async () => {
+    if(!confirm('Are you sure you want to delete this repair job? This action cannot be undone.')) return;
+    try {
+        const res = await fetch(`/api/repairs/${params.id}`, { method: 'DELETE' });
+        if(res.ok) {
+            toast({ title: 'Repair deleted' });
+            router.push('/repairs');
+        } else {
+            const err = await res.json();
+            toast({ title: 'Failed to delete', description: err.error, variant: 'destructive' });
+        }
+    } catch(e) {
+        toast({ title: 'Error deleting', variant: 'destructive' });
+    }
+  };
 
   useEffect(() => {
     if (params.id) {
@@ -85,6 +103,11 @@ export default function RepairDetailPage() {
             <FileText className="h-4 w-4 mr-2" />
             Invoice
           </Button>
+          {canDelete && (
+            <Button variant="destructive" size="icon" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
           {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
             <Button onClick={() => setShowStatusDialog(true)}>
               Update Status

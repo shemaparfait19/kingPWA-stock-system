@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { MainLayout } from '@/app/components/main-layout';
 import { AuthProvider } from '@/app/components/auth-provider';
 import { ServiceWorkerRegistration } from '@/app/components/service-worker-registration';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -13,13 +15,16 @@ export const metadata: Metadata = {
   description: 'Business management system for King Service Tech',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -38,10 +43,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <ServiceWorkerRegistration />
-        <AuthProvider>
-          <MainLayout>{children}</MainLayout>
-          <Toaster />
-        </AuthProvider>
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <AuthProvider>
+            <MainLayout>{children}</MainLayout>
+            <Toaster />
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

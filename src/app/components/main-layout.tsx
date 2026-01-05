@@ -30,6 +30,7 @@ import {
 import { UserNav } from './user-nav';
 import { useAuth } from './auth-provider';
 import { NotificationsDropdown } from './notifications-dropdown';
+import { LanguageSwitcher } from './language-switcher';
 import {
   hasPermission,
   canViewReports,
@@ -97,6 +98,13 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
           </SidebarContent>
           <SidebarFooter>
             <SidebarMenu>
+              {/* Language Switcher */}
+              <SidebarMenuItem>
+                <div className="px-2 py-1.5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2">
+                  <LanguageSwitcher />
+                </div>
+              </SidebarMenuItem>
+
              {/* Only show Settings if user has management permissions */}
               {hasPermission(user?.role, 'manage_settings') && (
                 <SidebarMenuItem>
