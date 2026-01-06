@@ -92,13 +92,20 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
-    console.log(`DELETE /api/customers/${params.id} by user:`, session.user.email, 'Role:', session.user.role);
+    
+    if (!session || !session.user) {
+       console.warn(`Unauthorized delete attempt - No session`);
+       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log(`DELETE /api/customers/${params.id} by user:`, session.user.email, 'Role:', (session.user as any).role);
     
     // Explicitly allow 'owner' or 'manager' locally to bypass potential helper issues
-    const isAuthorized = canDeleteCustomers(session.user.role) || session.user.role === 'owner' || session.user.role === 'manager';
+    const userRole = (session.user as any).role;
+    const isAuthorized = canDeleteCustomers(userRole) || userRole === 'owner' || userRole === 'manager';
 
-    if (!session || !session.user || !isAuthorized) {
-       console.warn(`Unauthorized delete attempt by role: ${session.user.role}`);
+    if (!isAuthorized) {
+       console.warn(`Unauthorized delete attempt by role: ${userRole}`);
        return NextResponse.json({ error: "Unauthorized: Only Admins can delete customers" }, { status: 403 });
     }
     
