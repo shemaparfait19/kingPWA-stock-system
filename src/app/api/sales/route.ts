@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { canManageSales } from '@/lib/permissions';
+import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
