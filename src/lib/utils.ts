@@ -8,8 +8,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Currency formatting for RWF
-export function formatCurrency(amount: number): string {
-  return `RWF ${amount.toLocaleString('en-US')}`;
+export function formatCurrency(amount: number | string | null | undefined): string {
+  if (amount === undefined || amount === null) return '-';
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num)) return '-';
+  return `RWF ${num.toLocaleString('en-US')}`;
 }
 
 // Date formatting
@@ -24,8 +27,12 @@ export function formatDate(date: Date | string): string {
   return `${month} ${day}, ${year}`;
 }
 
-export function formatDateTime(date: Date | string): string {
+export function formatDateTime(date: Date | string | null | undefined): string {
+  if (!date) return '-';
   const d = typeof date === 'string' ? new Date(date) : date;
+  
+  // Guard against invalid dates
+  if (isNaN(d.getTime())) return '-';
   
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const month = months[d.getMonth()];
