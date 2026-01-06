@@ -95,7 +95,7 @@ export async function DELETE(
     
     if (!session || !session.user) {
        console.warn(`Unauthorized delete attempt - No session`);
-       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+       return NextResponse.json({ error: "Unauthorized (No Session Found)" }, { status: 401 });
     }
 
     console.log(`DELETE /api/customers/${params.id} by user:`, session.user.email, 'Role:', (session.user as any).role);
@@ -106,7 +106,10 @@ export async function DELETE(
 
     if (!isAuthorized) {
        console.warn(`Unauthorized delete attempt by role: ${userRole}`);
-       return NextResponse.json({ error: "Unauthorized: Only Admins can delete customers" }, { status: 403 });
+       // Return debug info in error
+       return NextResponse.json({ 
+           error: `Unauthorized: Role '${userRole}' is not allowed to delete. Session: ${!!session}` 
+       }, { status: 403 });
     }
     
     await prisma.customer.delete({
