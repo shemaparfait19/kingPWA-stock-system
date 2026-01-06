@@ -119,10 +119,12 @@ export async function POST(request: NextRequest) {
 
     // Create invoice with transaction
     const result = await prisma.$transaction(async (tx) => {
+      console.log('Starting transaction...');
       // 1. Check stock for all items first
       for (const item of items) {
         const id = item.itemId || item.id;
         const quantity = item.quantity;
+        console.log(`Checking stock for item ${id}, qty ${quantity}`);
 
         const dbItem = await tx.inventoryItem.findUnique({
           where: { id }
@@ -136,6 +138,8 @@ export async function POST(request: NextRequest) {
           throw new Error(`Insufficient stock for ${dbItem.name}. Available: ${dbItem.quantity}, Requested: ${quantity}`);
         }
       }
+
+      console.log('Stock checks passed. Creating invoice...');
 
       // 2. Create Invoice
       const invoice = await tx.salesInvoice.create({
@@ -168,6 +172,8 @@ export async function POST(request: NextRequest) {
           customer: true,
         }
       });
+      
+      console.log(`Invoice created: ${invoice.id}. Updating inventory...`);
 
       // 3. Update Inventory
       for (const item of items) {
@@ -195,6 +201,8 @@ export async function POST(request: NextRequest) {
            }
         });
       }
+      
+      console.log('Transaction completed successfully.');
 
       return invoice;
     });
