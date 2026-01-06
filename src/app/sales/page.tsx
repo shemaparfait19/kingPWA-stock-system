@@ -172,10 +172,16 @@ export default function SalesPage() {
           </p>
         </div>
         {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
-          <Button onClick={() => setShowInvoice(true)}> {/* Assuming setDialogOpen refers to setShowInvoice for consistency with the page's state */}
-            <Plus className="mr-2 h-4 w-4" />
-            {t('newSale')}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => router.push('/sales/history')}>
+              <History className="mr-2 h-4 w-4" />
+              {t('history')}
+            </Button>
+            <Button onClick={() => setShowInvoice(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('newSale')}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -249,19 +255,33 @@ export default function SalesPage() {
                     <div className="flex-1">
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {formatCurrency(item.sellingPrice)} × {item.quantity}
+                        {formatCurrency(item.sellingPrice)} × {item.quantity} = {formatCurrency(item.sellingPrice * item.quantity)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateQuantity(item.id, parseInt(e.target.value) || 1)
-                        }
-                        className="w-16 text-center"
-                      />
+                       <div className="flex flex-col items-end gap-1">
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateQuantity(item.id, parseInt(e.target.value) || 1)
+                            }
+                            className="w-16 text-center h-8"
+                            placeholder="Qty"
+                          />
+                          <Input
+                            type="number"
+                            min="0"
+                            value={item.sellingPrice}
+                            onChange={(e) => {
+                                const newPrice = parseFloat(e.target.value);
+                                setCart(cart.map(c => c.id === item.id ? { ...c, sellingPrice: isNaN(newPrice) ? 0 : newPrice } : c));
+                            }}
+                            className="w-20 text-center h-8"
+                            placeholder="Price"
+                          />
+                       </div>
                       <Button
                         variant="ghost"
                         size="sm"

@@ -27,7 +27,7 @@ export default function InventoryPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
         </div>
-        {canCreateInventory(user?.role) && (
+        {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'sales') && (
           <Button onClick={handleAddItem}>
             <Plus className="mr-2 h-4 w-4" />
             {t('addItem')}

@@ -52,8 +52,7 @@ export default function CustomersPage() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching customers:', error);
-      setCustomers([]);
-      setFilteredCustomers([]);
+      // Don't clear existing customers on error, just stop loading
       setLoading(false);
     }
   };
