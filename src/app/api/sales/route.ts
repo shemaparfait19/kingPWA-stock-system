@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
              quantity: quantity,
              reason: 'sale',
              referenceId: invoice.id,
-             userId: userId,
+             userId: userId as string,
            }
         });
       }
