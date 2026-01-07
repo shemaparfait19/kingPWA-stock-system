@@ -11,7 +11,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
+    const session = await auth(request as any);
     if (!session || !session.user) {
        console.warn(`Unauthorized inventory update attempt - No session. Headers:`, request.headers.get('cookie'));
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -86,7 +86,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
+    const session = await auth(request as any);
     if (!session || !session.user) {
        console.warn(`Unauthorized inventory delete attempt - No session. Headers:`, request.headers.get('cookie'));
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
