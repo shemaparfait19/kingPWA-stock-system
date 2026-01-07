@@ -1,12 +1,18 @@
-// API route for removing parts from repair
+// API route for managing individual repair parts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSessionUser } from '@/lib/auth-helper';
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string; partId: string } }
 ) {
   try {
+    const session = await getSessionUser(request);
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Get part details before deleting
     const part = await prisma.repairPart.findUnique({
       where: { id: params.partId },
@@ -24,33 +30,121 @@ export async function DELETE(
       where: { id: params.partId },
     });
 
-    // Return quantity to inventory
-    await prisma.inventoryItem.update({
-      where: { id: part.itemId },
-      data: {
-        quantity: {
-          increment: part.quantity,
+    // Only return to inventory if it was a stock item
+    if (part.itemId) {
+        await prisma.inventoryItem.update({
+        where: { id: part.itemId },
+        data: {
+            quantity: {
+            increment: part.quantity,
+            },
         },
-      },
-    });
+        });
 
-    // Create inventory transaction
-    await prisma.inventoryTransaction.create({
-      data: {
-        itemId: part.itemId,
-        quantity: part.quantity,
-        type: 'IN',
-        reason: 'return',
-        notes: `Returned from repair job ${params.id}`,
-        userId: 'system', // Should be actual user ID
-      },
-    });
+        // Create inventory transaction
+        await prisma.inventoryTransaction.create({
+        data: {
+            itemId: part.itemId,
+            quantity: part.quantity,
+            type: 'IN',
+            reason: 'return',
+            notes: `Returned from repair job ${params.id}`,
+            userId: session.user.id,
+        },
+        });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error removing part:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to remove part' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string; partId: string } }
+) {
+  try {
+    const session = await getSessionUser(request);
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { quantity, customName, unitCost } = body;
+
+    // Get current part state
+    const currentPart = await prisma.repairPart.findUnique({
+        where: { id: params.partId }
+    });
+
+    if (!currentPart) {
+        return NextResponse.json({ error: "Part not found" }, { status: 404 });
+    }
+
+    // Handle Inventory Sync if quantity changed and it's a stock item
+    if (currentPart.itemId && quantity !== undefined && quantity !== currentPart.quantity) {
+        const diff = quantity - currentPart.quantity;
+        // diff > 0 means we used MORE => Decrement Stock
+        // diff < 0 means we used LESS => Increment Stock (Return)
+
+        // Check if we have enough stock for the increase
+        if (diff > 0) {
+             const inventoryItem = await prisma.inventoryItem.findUnique({
+                where: { id: currentPart.itemId }
+             });
+             if (!inventoryItem || inventoryItem.quantity < diff) {
+                return NextResponse.json({ 
+                    error: `Insufficient stock. Available: ${inventoryItem?.quantity || 0}, Need: ${diff}` 
+                }, { status: 400 });
+             }
+        }
+
+        await prisma.inventoryItem.update({
+            where: { id: currentPart.itemId },
+            data: {
+                quantity: {
+                    decrement: diff // Works for both positive (dec) and negative (inc)
+                }
+            }
+        });
+
+        // Log transaction
+        await prisma.inventoryTransaction.create({
+            data: {
+                itemId: currentPart.itemId,
+                quantity: Math.abs(diff),
+                type: diff > 0 ? 'OUT' : 'IN',
+                reason: diff > 0 ? 'usage_adjustment' : 'return_adjustment',
+                notes: `Adjustment on repair job ${params.id}`,
+                userId: session.user.id,
+            }
+        });
+    }
+
+    // Update the record
+    const updatedPart = await prisma.repairPart.update({
+        where: { id: params.partId },
+        data: {
+            quantity: quantity !== undefined ? Number(quantity) : undefined,
+            customName: customName, // Allow updating name for external/stock parts? usually only external
+            unitCost: unitCost !== undefined ? Number(unitCost) : undefined,
+            // Update totalCost automatically? 
+            // Usually valid totalCost is calculated, but keeping it simple or if schema stores it.
+            // Schema likely doesn't store totalCost (computed).
+        }
+    });
+
+    return NextResponse.json(updatedPart);
+
+  } catch (error: any) {
+    console.error('Error updating part:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to update part' },
       { status: 500 }
     );
   }
