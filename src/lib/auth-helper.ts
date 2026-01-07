@@ -18,18 +18,29 @@ export async function getSessionUser(request: NextRequest) {
         return null;
     }
 
-    const token = await getToken({ 
-      req: request, 
-      secret,
-      secureCookie: process.env.NODE_ENV === "production",
-      salt: process.env.NODE_ENV === "production" 
-            ? "__Secure-next-auth.session-token"
-            : "next-auth.session-token" 
-    });
+    // Try standard retrieval first (NextAuth auto-detects based on NEXTAUTH_URL/NODE_ENV usually)
+    let token = await getToken({ req: request, secret });
+
+    // If that fails, try forcibly looking for the production secure cookie
+    if (!token) {
+        token = await getToken({ 
+            req: request, 
+            secret, 
+            salt: "__Secure-next-auth.session-token"
+        });
+    }
+
+    // If that fails, try forcibly looking for the dev cookie
+    if (!token) {
+        token = await getToken({ 
+            req: request, 
+            secret, 
+            salt: "next-auth.session-token"
+        });
+    }
 
     if (!token || !token.sub) {
-      // Try fallback: sometimes `getToken` fails to auto-detect the secure cookie name in some environments
-      // If we are in prod, try the non-secure name just in case, or vice versa if misconfigured
+      console.warn("getSessionUser: No token found. Cookies:", request.headers.get("cookie"));
       return null;
     }
 
@@ -45,8 +56,14 @@ export async function getSessionUser(request: NextRequest) {
       }
     });
 
-    if (!user || !user.active) {
-      return null;
+    if (!user) {
+         console.warn("getSessionUser: Token valid but user not found in DB:", token.sub);
+         return null;
+    }
+
+    if (!user.active) {
+         console.warn("getSessionUser: User inactive:", user.email);
+         return null;
     }
 
     // 3. Construct a session-like object or just return the user
