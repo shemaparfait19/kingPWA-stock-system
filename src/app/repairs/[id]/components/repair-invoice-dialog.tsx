@@ -6,6 +6,7 @@ import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Printer, X, Smartphone } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Image from 'next/image';
 
 interface RepairInvoiceDialogProps {
   open: boolean;
@@ -16,37 +17,55 @@ interface RepairInvoiceDialogProps {
 export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoiceDialogProps) {
   if (!repair) return null;
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
     
+    // Add Logo
+    try {
+        // Load logo from public folder
+        const logoUrl = '/logo.png';
+        const response = await fetch(logoUrl);
+        const blob = await response.blob();
+        const base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+        });
+        
+        // Add logo centered at top (Width 25, Height 25 approx)
+        doc.addImage(base64, 'PNG', 92.5, 10, 25, 25);
+    } catch (e) {
+        console.error("Failed to add logo to PDF:", e);
+    }
+
     // Header
     doc.setFontSize(20);
     doc.setTextColor(59, 130, 246);
-    doc.text('KING SERVICE TECH', 105, 15, { align: 'center' });
+    doc.text('KING SERVICE TECH', 105, 45, { align: 'center' });
     
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text('Phone & Computer Repair Services', 105, 22, { align: 'center' });
-    doc.text('Phone: +250 787 649 480', 105, 27, { align: 'center' });
+    doc.text('Phone & Computer Repair Services', 105, 52, { align: 'center' });
+    doc.text('Phone: +250 787 649 480', 105, 57, { align: 'center' });
 
     // Invoice Info
     doc.setFontSize(12);
     doc.setTextColor(0);
-    doc.text(`REPAIR INVOICE #${repair.jobNumber}`, 14, 40);
+    doc.text(`REPAIR INVOICE #${repair.jobNumber}`, 14, 70);
     doc.setFontSize(10);
-    doc.text(`Date: ${formatDateTime(new Date())}`, 14, 46);
+    doc.text(`Date: ${formatDateTime(new Date())}`, 14, 76);
     
     // Customer Info
-    doc.text(`Customer: ${repair.customer.name}`, 14, 52);
-    if (repair.customer.phone) doc.text(`Phone: ${repair.customer.phone}`, 14, 57);
+    doc.text(`Customer: ${repair.customer.name}`, 14, 85);
+    if (repair.customer.phone) doc.text(`Phone: ${repair.customer.phone}`, 14, 90);
 
     // Device Info
-    doc.text(`Device: ${repair.deviceType} - ${repair.brand} ${repair.model}`, 14, 65);
-    if (repair.serialNumber) doc.text(`SN: ${repair.serialNumber}`, 14, 70);
+    doc.text(`Device: ${repair.deviceType} - ${repair.brand} ${repair.model}`, 14, 100);
+    if (repair.serialNumber) doc.text(`SN: ${repair.serialNumber}`, 14, 105);
 
     // Table
     const tableColumn = ["Description", "Qty", "Cost"];
-    const tableRows = [];
+    const tableRows: any[] = [];
 
     // Parts
     // Assuming repair.parts is array of { inventoryItem: { name }, quantity, unitPrice/cost }
@@ -54,9 +73,9 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
     if (repair.partsUsed && repair.partsUsed.length > 0) {
       repair.partsUsed.forEach((part: any) => {
         tableRows.push([
-           part.inventoryItem?.name || 'Part',
+           part.inventoryItem?.name || part.customName || 'Part',
            part.quantity,
-           formatCurrency(part.price || 0)
+           formatCurrency(part.unitCost || part.price || 0)
         ]);
       });
     }
@@ -72,7 +91,7 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
     }
 
     autoTable(doc, {
-        startY: 75,
+        startY: 110,
         head: [tableColumn],
         body: tableRows,
         theme: 'grid',
@@ -80,7 +99,7 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
     });
 
     // Totals
-    const finalY = (doc as any).lastAutoTable.finalY || 75;
+    const finalY = (doc as any).lastAutoTable.finalY || 110;
     const total = repair.actualCost || repair.estimatedCost;
     const paid = repair.depositPaid || 0;
     const balance = total - paid;
@@ -100,7 +119,7 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
   };
 
   const handleShare = async () => {
-    const doc = generatePDF();
+    const doc = await generatePDF();
     const pdfBlob = doc.output('blob');
     const file = new File([pdfBlob], `Repair_${repair.jobNumber}.pdf`, { type: 'application/pdf' });
 
@@ -123,9 +142,13 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
         } else if (phone.startsWith('7')) {
              phone = '250' + phone;
         }
-
-        const waLink = `https://wa.me/${phone}?text=Hello, your repair for ${repair.deviceType} (${repair.brand} ${repair.model}) is ready. Please find the invoice attached (downloaded).`;
-        window.open(waLink, '_blank');
+        
+        if (phone) {
+             const waLink = `https://wa.me/${phone}?text=Hello, your repair for ${repair.deviceType} (${repair.brand} ${repair.model}) is ready. Please find the invoice attached (I just downloaded it for you).`;
+             window.open(waLink, '_blank');
+        } else {
+             alert('Invoice downloaded.');
+        }
     }
   };
 
@@ -156,7 +179,12 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
         </DialogHeader>
 
         <div className="space-y-6 print:p-8">
-          <div className="text-center border-b pb-4">
+          <div className="text-center border-b pb-4 flex flex-col items-center">
+            {/* Logo in HTML View */}
+            <div className="h-24 w-24 relative mb-2">
+                 <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+            </div>
+
             <h1 className="text-3xl font-bold text-blue-600">KING SERVICE TECH</h1>
             <p className="text-gray-600">Phone & Computer Repair Services</p>
             <p className="text-sm text-gray-500">Phone: +250 787 649 480 | Website: kingservicetechltd.com/</p>
@@ -188,9 +216,12 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
             <tbody>
               {repair.partsUsed && repair.partsUsed.map((part: any, i: number) => (
                  <tr key={i} className="border-b">
-                   <td className="p-3">{part.inventoryItem?.name || 'Part'}</td>
+                   <td className="p-3">
+                       {part.inventoryItem ? part.inventoryItem.name : (part.customName || 'Part')}
+                       {!part.inventoryItem && <span className="text-xs text-muted-foreground ml-2">(External)</span>}
+                   </td>
                    <td className="text-right p-3">{part.quantity}</td>
-                   <td className="text-right p-3">{formatCurrency(part.price || 0)}</td>
+                   <td className="text-right p-3">{formatCurrency(part.unitCost || part.price || 0)}</td>
                  </tr>
               ))}
               {repair.laborCost > 0 && (
