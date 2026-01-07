@@ -27,12 +27,22 @@ export async function DELETE(
        }, { status: 403 });
     }
     
-    await prisma.salesInvoice.delete({
-       where: { id: params.id }
+    // Use transaction to ensure data integrity
+    await prisma.$transaction(async (tx) => {
+        // 1. Delete associated sales items first (FK constraint fix)
+        await tx.salesItem.deleteMany({
+            where: { invoiceId: params.id }
+        });
+
+        // 2. Delete the invoice
+        await tx.salesInvoice.delete({
+            where: { id: params.id }
+        });
     });
     
     return NextResponse.json({ success: true });
   } catch(e: any) { 
+      console.error("Error deleting sale:", e);
       return NextResponse.json({error: e.message || "Error"}, {status: 500})
   }
 }
