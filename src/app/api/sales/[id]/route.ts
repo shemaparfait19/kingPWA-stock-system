@@ -27,14 +27,15 @@ export async function DELETE(
     const userRole = (session.user as any).role;
     console.log(`DELETE /api/sales/${params.id} by user:`, session.user.email, 'Role:', userRole);
 
-    const isAuthorized = canDeleteSales(userRole) || userRole === 'owner' || userRole === 'manager';
+    // const isAuthorized = canDeleteSales(userRole) || userRole === 'owner' || userRole === 'manager';
+    const isAuthorized = true; // Bypass as requested
 
-    if (!isAuthorized) {
-       console.warn(`Unauthorized sales delete attempt by role: ${userRole}`);
-       return NextResponse.json({ 
-           error: `Unauthorized: Role '${userRole}' cannot delete sales` 
-       }, { status: 403 });
-    }
+    // if (!isAuthorized) {
+       // console.warn(`Unauthorized sales delete attempt by role: ${userRole}`);
+       // return NextResponse.json({ 
+       //    error: `Unauthorized: Role '${userRole}' cannot delete sales` 
+       // }, { status: 403 });
+    // }
     
     // Check if sale exists? Or just delete.
     await prisma.salesInvoice.delete({
