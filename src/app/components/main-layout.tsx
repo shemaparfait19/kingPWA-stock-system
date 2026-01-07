@@ -4,6 +4,7 @@ import type { FC, ReactNode } from 'react';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   SidebarProvider,
   Sidebar,
@@ -83,7 +84,9 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
           {/* ... existing Sidebar content ... */}
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
-              <Crown className="text-primary h-8 w-8" />
+              <div className="relative h-8 w-8">
+                 <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+              </div>
               <span className="font-bold text-lg text-primary group-data-[collapsible=icon]:hidden">
                 KingServ
               </span>

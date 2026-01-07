@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -82,8 +83,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <Crown className="h-12 w-12 text-primary" />
+            <div className="p-3 bg-primary/10 rounded-full h-24 w-24 relative flex items-center justify-center">
+              <Image src="/logo.png" alt="Logo" fill className="object-contain p-2" />
             </div>
           </div>
           <div>

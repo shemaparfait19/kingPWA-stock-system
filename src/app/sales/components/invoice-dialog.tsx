@@ -7,6 +7,7 @@ import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Printer, Download, X, Share2, Smartphone } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Image from 'next/image';
 
 interface InvoiceDialogProps {
   open: boolean;
@@ -17,29 +18,48 @@ interface InvoiceDialogProps {
 export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProps) {
     if (!invoice) return null;
 
-    const generatePDF = () => {
+    const generatePDF = async () => {
         const doc = new jsPDF();
         
-        // Header
+        // Add Logo
+        try {
+            // Load logo from public folder
+            const logoUrl = '/logo.png';
+            const response = await fetch(logoUrl);
+            const blob = await response.blob();
+            const base64 = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(blob);
+            });
+            
+            // Add logo centered at top (Width 25, Height 25 approx)
+            // Page width is ~210mm. Center is 105.
+            doc.addImage(base64, 'PNG', 92.5, 10, 25, 25);
+        } catch (e) {
+            console.error("Failed to add logo to PDF:", e);
+        }
+
+        // Header Text (Moved down to accommodate logo)
         doc.setFontSize(20);
         doc.setTextColor(59, 130, 246); // Blue
-        doc.text('KING SERVICE TECH', 105, 15, { align: 'center' });
+        doc.text('KING SERVICE TECH', 105, 45, { align: 'center' });
         
         doc.setFontSize(10);
         doc.setTextColor(100);
-        doc.text('Phone & Computer Repair Services', 105, 22, { align: 'center' });
-        doc.text('Phone: +250 787 649 480', 105, 27, { align: 'center' });
+        doc.text('Phone & Computer Repair Services', 105, 52, { align: 'center' });
+        doc.text('Phone: +250 787 649 480', 105, 57, { align: 'center' });
 
         // Invoice Info
         doc.setFontSize(12);
         doc.setTextColor(0);
-        doc.text(`INVOICE #${invoice.invoiceNumber}`, 14, 40);
+        doc.text(`INVOICE #${invoice.invoiceNumber}`, 14, 70);
         doc.setFontSize(10);
-        doc.text(`Date: ${formatDateTime(invoice.saleDate)}`, 14, 46);
+        doc.text(`Date: ${formatDateTime(invoice.saleDate)}`, 14, 76);
         
         if (invoice.customer) {
-            doc.text(`Customer: ${invoice.customer.name}`, 14, 52);
-            if (invoice.customer.phone) doc.text(`Phone: ${invoice.customer.phone}`, 14, 57);
+            doc.text(`Customer: ${invoice.customer.name}`, 14, 82);
+            if (invoice.customer.phone) doc.text(`Phone: ${invoice.customer.phone}`, 14, 87);
         }
 
         // Table
@@ -52,7 +72,7 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
         ]);
 
         autoTable(doc, {
-            startY: 65,
+            startY: 95,
             head: [tableColumn],
             body: tableRows,
             theme: 'grid',
@@ -60,7 +80,7 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
         });
 
         // Totals
-        const finalY = (doc as any).lastAutoTable.finalY || 65;
+        const finalY = (doc as any).lastAutoTable.finalY || 95;
         doc.text(`Subtotal: ${formatCurrency(invoice.subtotal)}`, 140, finalY + 10);
         doc.text(`Tax: ${formatCurrency(invoice.tax)}`, 140, finalY + 15);
         doc.setFontSize(12);
@@ -75,13 +95,13 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
         return doc;
     };
 
-    const handleDownload = () => {
-        const doc = generatePDF();
+    const handleDownload = async () => {
+        const doc = await generatePDF();
         doc.save(`Invoice_${invoice.invoiceNumber}.pdf`);
     };
 
     const handleShare = async () => {
-        const doc = generatePDF();
+        const doc = await generatePDF();
         const pdfBlob = doc.output('blob');
         const file = new File([pdfBlob], `Invoice_${invoice.invoiceNumber}.pdf`, { type: 'application/pdf' });
 
@@ -97,21 +117,21 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
             }
         } else {
             // Fallback for desktop: Download and open WhatsApp Web
-            handleDownload();
             const phone = invoice.customer?.phone ? invoice.customer.phone.replace(/\D/g, '') : '';
-            const waLink = `https://wa.me/${phone}?text=Hello, please find your invoice attached (downloaded).`;
-            window.open(waLink, '_blank');
+            // We can't auto-attach to WA web, but we can download it.
+            doc.save(`Invoice_${invoice.invoiceNumber}.pdf`);
+            if (phone) {
+                 const waLink = `https://wa.me/${phone}?text=Hello, please find your invoice attached (I just downloaded it for you).`;
+                 window.open(waLink, '_blank');
+            } else {
+                 alert('Invoice downloaded.');
+            }
         }
     };
 
     const handlePrint = () => {
          window.print();
     };
-    
-    // ... helper for getInvoiceHTML (keep existing if needed for print, or replace with PDF print logic) ...
-    // Assuming we keep getInvoiceHTML for window.print() CSS styles as backup or clean-up.
-    // For brevity, I'll rely on the existing HTML/CSS print or just the PDF download. 
-    // The user specifically asked for "send as PDF", so the share button is key.
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,7 +157,12 @@ export function InvoiceDialog({ open, onOpenChange, invoice }: InvoiceDialogProp
         
         {/* Invoice Content */}
         <div className="space-y-6 print:p-8">
-          <div className="text-center border-b pb-4">
+          <div className="text-center border-b pb-4 flex flex-col items-center">
+            {/* Logo in HTML View */}
+            <div className="h-24 w-24 relative mb-2">
+                 <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+            </div>
+            
             <h1 className="text-2xl md:text-3xl font-bold text-blue-600">KING SERVICE TECH</h1>
             <p className="text-gray-600 text-sm md:text-base">Phone & Computer Repair Services</p>
             <p className="text-xs md:text-sm text-gray-500 mt-1">Phone: +250 787 649 480 | Website: kingservicetechltd.com/</p>
