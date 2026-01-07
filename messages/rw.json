@@ -90,7 +90,7 @@
     "searchPlaceholder": "Shakisha mu izina, telefoni, cyangwa imeri...",
     "noCustomers": "Nta bakiriya babonetse",
     "types": {
-      "walk_in": "Umukiriya w'Akadiho",
+      "walk_in": "Umukiriya w'ihuta",
       "regular": "Umukiriya Usanzwe",
       "vip": "Umukiriya Wihariye",
       "corporate": "Ikigo"
@@ -118,10 +118,10 @@
     "noRepairs": "Nta mirimo yo gusana iraboneka",
     "overdue": "Byatinze",
     "actions": {
-      "markDiagnosed": "Shyiraho Yasuzumwe",
+      "markDiagnosed": "Byasuzumwe",
       "startRepair": "Tangira Gusana",
-      "markReady": "Shyiraho Byiteguye",
-      "markCollected": "Shyiraho Byakuwe",
+      "markReady": "Birateguye",
+      "markCollected": "Byatwawe",
       "statusUpdated": "Imiterere yahinduwe",
       "jobMoved": "Akazi {jobNumber} kageze kuri {status}"
     },
@@ -132,7 +132,7 @@
       "waiting_parts": "Itegereje Ibice",
       "ready": "Byiteguye",
       "collected": "Byakuwe",
-      "abandoned": "Byatereranijwe"
+      "abandoned": "Byatereranwe"
     },
     "form": {
       "title": "Akazi Gashya ko Gusana",
