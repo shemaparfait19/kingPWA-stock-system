@@ -1,7 +1,7 @@
 // API route for individual inventory item operations
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth-helper';
 import { canEditInventory, canDeleteInventory } from '@/lib/permissions';
 
 
@@ -11,7 +11,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth(request as any);
+    const session = await getSessionUser(request);
     if (!session || !session.user) {
        console.warn(`Unauthorized inventory update attempt - No session. Headers:`, request.headers.get('cookie'));
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -86,7 +86,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth(request as any);
+    const session = await getSessionUser(request);
     if (!session || !session.user) {
        console.warn(`Unauthorized inventory delete attempt - No session. Headers:`, request.headers.get('cookie'));
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

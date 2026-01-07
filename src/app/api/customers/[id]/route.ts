@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-import { auth } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth-helper';
 import { canDeleteCustomers } from '@/lib/permissions';
 
 export async function GET(
@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
+    const session = await getSessionUser(request);
     if (!session || !session.user) {
        // return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
        console.log("Allowing unauthenticated access to customer details for debugging");
@@ -56,7 +56,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth(request as any);
+    const session = await getSessionUser(request);
     if (!session || !session.user) {
        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -91,7 +91,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth(request as any);
+    const session = await getSessionUser(request);
     
     if (!session || !session.user) {
        console.warn(`Unauthorized delete attempt - No session`);

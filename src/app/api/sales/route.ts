@@ -51,9 +51,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
+import { getSessionUser } from '@/lib/auth-helper';
+
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth(request as any);
+    const session = await getSessionUser(request);
     let userId: string | undefined;
 
     if (session && session.user) {
