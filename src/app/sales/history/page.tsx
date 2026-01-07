@@ -50,7 +50,7 @@ export default function SalesHistoryPage() {
     if (!confirm('Are you sure you want to delete this sale record? This action cannot be undone.')) return;
 
     try {
-        const res = await fetch(`/api/sales/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/sales/${id}`, { method: 'DELETE', credentials: 'include' });
         if (res.ok) {
             toast({ title: 'Sale deleted' });
             fetchSales();
