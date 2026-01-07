@@ -178,7 +178,7 @@ export function InventoryTable({ type }: InventoryTableProps) {
                                 variant="ghost"
                                 size="sm"
                                 className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => {
+                                onClick={async () => {
                                     if(confirm(tCommon('confirm') + '?')) {
                                         try {
                                             const res = await fetch(`/api/inventory/${item.id}`, { method: 'DELETE' });

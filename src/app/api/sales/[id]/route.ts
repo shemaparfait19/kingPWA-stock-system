@@ -18,8 +18,22 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
-    if (!session || !session.user || !canDeleteSales(session.user.role)) {
-       return NextResponse.json({ error: "Unauthorized: Only Owners can delete sales" }, { status: 403 });
+    
+    if (!session || !session.user) {
+       console.warn(`Unauthorized sales delete attempt - No session`);
+       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userRole = (session.user as any).role;
+    console.log(`DELETE /api/sales/${params.id} by user:`, session.user.email, 'Role:', userRole);
+
+    const isAuthorized = canDeleteSales(userRole) || userRole === 'owner' || userRole === 'manager';
+
+    if (!isAuthorized) {
+       console.warn(`Unauthorized sales delete attempt by role: ${userRole}`);
+       return NextResponse.json({ 
+           error: `Unauthorized: Role '${userRole}' cannot delete sales` 
+       }, { status: 403 });
     }
     
     // Check if sale exists? Or just delete.
