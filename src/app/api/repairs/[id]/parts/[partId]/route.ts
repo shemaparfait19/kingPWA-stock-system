@@ -14,7 +14,7 @@ export async function DELETE(
     }
 
     // Get part details before deleting
-    const part = await prisma.repairPart.findUnique({
+    const part = await prisma.repairPartUsed.findUnique({
       where: { id: params.partId },
     });
 
@@ -26,7 +26,7 @@ export async function DELETE(
     }
 
     // Delete the part
-    await prisma.repairPart.delete({
+    await prisma.repairPartUsed.delete({
       where: { id: params.partId },
     });
 
@@ -78,7 +78,7 @@ export async function PATCH(
     const { quantity, customName, unitCost } = body;
 
     // Get current part state
-    const currentPart = await prisma.repairPart.findUnique({
+    const currentPart = await prisma.repairPartUsed.findUnique({
         where: { id: params.partId }
     });
 
@@ -119,7 +119,7 @@ export async function PATCH(
                 itemId: currentPart.itemId,
                 quantity: Math.abs(diff),
                 type: diff > 0 ? 'OUT' : 'IN',
-                reason: diff > 0 ? 'usage_adjustment' : 'return_adjustment',
+                reason: diff > 0 ? 'repair_use' : 'return',
                 notes: `Adjustment on repair job ${params.id}`,
                 userId: session.user.id,
             }
@@ -127,7 +127,7 @@ export async function PATCH(
     }
 
     // Update the record
-    const updatedPart = await prisma.repairPart.update({
+    const updatedPart = await prisma.repairPartUsed.update({
         where: { id: params.partId },
         data: {
             quantity: quantity !== undefined ? Number(quantity) : undefined,
