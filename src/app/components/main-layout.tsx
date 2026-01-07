@@ -85,9 +85,9 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
               <div className="relative h-8 w-8">
-                 <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+                 <Image src="/logowhite.png" alt="Logo" fill className="object-contain" />
               </div>
-              <span className="font-bold text-lg text-primary group-data-[collapsible=icon]:hidden">
+              <span className="font-bold text-lg text-white group-data-[collapsible=icon]:hidden">
                 KingServ
               </span>
             </div>
