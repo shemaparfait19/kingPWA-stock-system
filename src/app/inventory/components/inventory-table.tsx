@@ -179,9 +179,18 @@ export function InventoryTable({ type }: InventoryTableProps) {
                                 size="sm"
                                 className="text-red-500 hover:text-red-700 hover:bg-red-50"
                                 onClick={() => {
-                                    if(confirm('Are you sure you want to delete this item?')) {
-                                        // TODO: Implement delete API call
-                                        alert('Delete functionality to be implemented in API');
+                                    if(confirm(tCommon('confirm') + '?')) {
+                                        try {
+                                            const res = await fetch(`/api/inventory/${item.id}`, { method: 'DELETE' });
+                                            if(res.ok) {
+                                                fetchItems();
+                                            } else {
+                                                const err = await res.json();
+                                                alert(err.error || 'Failed to delete');
+                                            }
+                                        } catch(err: any) {
+                                            alert('Error deleting item');
+                                        }
                                     }
                                 }}
                                 >
