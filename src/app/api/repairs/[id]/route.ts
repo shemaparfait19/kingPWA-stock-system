@@ -64,7 +64,7 @@ export async function PATCH(
 ) {
   try {
     const session = await auth();
-    if (!session || !session.user || !canEditRepairDetails(session.user.role)) {
+    if (!session || !session.user || !canEditRepairDetails((session.user as any).role)) {
        return NextResponse.json({ error: "Unauthorized: Need manage permissions" }, { status: 403 });
     }
 
@@ -101,7 +101,7 @@ export async function DELETE(
   try {
     const session = await auth();
     // Check permission for deleting repairs. Key is 'delete_repairs'.
-    if (!session || !session.user || !hasPermission(session.user.role, 'delete_repairs')) {
+    if (!session || !session.user || !hasPermission((session.user as any).role, 'delete_repairs')) {
        return NextResponse.json({ error: "Unauthorized: Only Admins can delete repairs" }, { status: 403 });
     }
 

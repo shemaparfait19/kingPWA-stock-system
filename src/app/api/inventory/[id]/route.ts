@@ -96,13 +96,12 @@ export async function DELETE(
     console.log(`DELETE /api/inventory/${params.id} by user:`, session.user.email, 'Role:', userRole);
 
     // Explicitly allow owner and manager to delete
-    // const isAuthorized = canDeleteInventory(userRole) || userRole === 'owner' || userRole === 'manager';
-    const isAuthorized = true;
+    const isAuthorized = canDeleteInventory(userRole);
 
-    // if (!isAuthorized) {
-    //    console.warn(`Unauthorized inventory delete attempt by role: ${userRole}`);
-    //    return NextResponse.json({ error: `Unauthorized: Role '${userRole}' cannot delete inventory` }, { status: 403 });
-    // }
+    if (!isAuthorized) {
+       console.warn(`Unauthorized inventory delete attempt by role: ${userRole}`);
+       return NextResponse.json({ error: `Unauthorized: Role '${userRole}' cannot delete inventory` }, { status: 403 });
+    }
 
     const existingItem = await prisma.inventoryItem.findUnique({
       where: { id: params.id },

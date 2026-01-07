@@ -100,18 +100,14 @@ export async function DELETE(
 
     console.log(`DELETE /api/customers/${params.id} by user:`, session.user.email, 'Role:', (session.user as any).role);
     
-    // Explicitly allow 'owner' or 'manager' locally to bypass potential helper issues
-    const userRole = (session.user as any).role;
-    // const isAuthorized = canDeleteCustomers(userRole) || userRole === 'owner' || userRole === 'manager';
-    const isAuthorized = true;
+    const isAuthorized = canDeleteCustomers((session.user as any).role);
 
-    // if (!isAuthorized) {
-       // console.warn(`Unauthorized delete attempt by role: ${userRole}`);
-       // // Return debug info in error
-       // return NextResponse.json({ 
-       //    error: `Unauthorized: Role '${userRole}' is not allowed to delete. Session: ${!!session}` 
-       // }, { status: 403 });
-    // }
+    if (!isAuthorized) {
+       console.warn(`Unauthorized delete attempt by role: ${(session.user as any).role}`);
+       return NextResponse.json({ 
+          error: `Unauthorized: Role '${(session.user as any).role}' is not allowed to delete customers.` 
+       }, { status: 403 });
+    }
     
     await prisma.customer.delete({
       where: { id: params.id },
