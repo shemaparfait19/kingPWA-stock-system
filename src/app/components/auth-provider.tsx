@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { signOut as nextAuthSignOut } from 'next-auth/react';
 import type { User } from '@/lib/types';
 import { signOutUser, setCurrentUser, getUserByEmail } from '@/lib/auth-service';
 
@@ -112,6 +113,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleSignOut = async () => {
+    // Clear NextAuth Session (Cookies)
+    await nextAuthSignOut({ redirect: false });
+    
+    // Clear Local State
     await signOutUser();
     handleSetUser(null);
     router.push('/login');
