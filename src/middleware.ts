@@ -8,5 +8,6 @@ export default auth((req) => {
 })
  
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Matcher ignoring `/_next/`, `/static/`, `/api/` etc. to let API handle its own auth
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }

@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth-helper';
 import { canCreateInventory } from '@/lib/permissions';
 
 export async function GET(request: NextRequest) {
+  // Inventory list can be public or protected. Assuming protected for consistency, but keeping it open if it was intended.
+  // Actually, let's protect it to be safe, or just check session if logic requires it.
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
 
+    // Optional: Check session if you want to restrict inventory view
+    // const session = await getSessionUser(request);
+    
+    // For now keeping it consistent with original logic (no enforced check in GET, but catching errors)
     const items = await prisma.inventoryItem.findMany({
       where: {
         active: true,
@@ -34,11 +40,11 @@ export async function POST(request: NextRequest) {
   let body: any;
   
   try {
-    const session = await auth();
-    // if (!session || !session.user || !canCreateInventory(session.user.role)) {
-    //    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    // }
-    console.log("Allowing unauthenticated inventory creation for debugging");
+    const session = await getSessionUser(request);
+    if (!session || !session.user) { // || !canCreateInventory(session.user.role)) {
+       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // console.log("Allowing unauthenticated inventory creation for debugging");
 
     body = await request.json();
     

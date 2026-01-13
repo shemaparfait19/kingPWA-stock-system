@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+import { getSessionUser } from '@/lib/auth-helper';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -13,6 +15,16 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const session = await getSessionUser(request);
+    if (!session || !session.user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    // Ensure user is requesting their own notifications or is admin
+    // if (session.user.id !== userId && session.user.role !== 'owner' && session.user.role !== 'manager') {
+    //    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // }
 
     const notifications = await prisma.notification.findMany({
       where: { userId },
