@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth-helper';
+import { updateRepairFinancials } from '@/lib/repair-helpers';
 
 export async function DELETE(
   request: NextRequest,
@@ -53,6 +54,9 @@ export async function DELETE(
         },
         });
     }
+
+    // Recalculate Repair Totals
+    await updateRepairFinancials(params.id);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -131,13 +135,18 @@ export async function PATCH(
         where: { id: params.partId },
         data: {
             quantity: quantity !== undefined ? Number(quantity) : undefined,
-            customName: customName, // Allow updating name for external/stock parts? usually only external
+            customName: customName, 
             unitCost: unitCost !== undefined ? Number(unitCost) : undefined,
-            // Update totalCost automatically? 
-            // Usually valid totalCost is calculated, but keeping it simple or if schema stores it.
-            // Schema likely doesn't store totalCost (computed).
+            // Recalculate totalCost for the line item
+            ...(quantity !== undefined || unitCost !== undefined ? {
+                 totalCost: (Number(unitCost !== undefined ? unitCost : currentPart.unitCost) * 
+                             Number(quantity !== undefined ? quantity : currentPart.quantity))
+            } : {})
         }
     });
+
+    // Recalculate Repair Totals
+    await updateRepairFinancials(params.id);
 
     return NextResponse.json(updatedPart);
 

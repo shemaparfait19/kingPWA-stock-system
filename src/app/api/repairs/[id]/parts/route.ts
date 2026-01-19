@@ -1,6 +1,7 @@
 // API route for managing parts used in repairs
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { updateRepairFinancials } from '@/lib/repair-helpers';
 
 export async function POST(
   request: NextRequest,
@@ -108,6 +109,9 @@ export async function POST(
         item: true,
       },
     });
+
+    // Recalculate Totals
+    await updateRepairFinancials(params.id);
 
     return NextResponse.json(partUsed);
   } catch (error: any) {

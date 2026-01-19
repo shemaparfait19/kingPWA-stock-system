@@ -17,6 +17,8 @@ import { PartsUsed } from './components/parts-used';
 import { PhotoGallery } from './components/photo-gallery';
 import { StatusUpdateDialog } from './components/status-update-dialog';
 import { RepairInvoiceDialog } from './components/repair-invoice-dialog';
+import { EditRepairDialog } from './components/edit-repair-dialog';
+import { Pencil } from 'lucide-react';
 
 export default function RepairDetailPage() {
   const params = useParams();
@@ -27,6 +29,7 @@ export default function RepairDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const canDelete = canDeleteRepairs(user?.role);
 
   const handleDelete = async () => {
@@ -103,6 +106,12 @@ export default function RepairDetailPage() {
             <FileText className="h-4 w-4 mr-2" />
             Invoice
           </Button>
+          {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'technician') && (
+             <Button variant="outline" onClick={() => setShowEditDialog(true)}>
+               <Pencil className="h-4 w-4 mr-2" />
+               Edit Job
+             </Button>
+          )}
           {canDelete && (
             <Button variant="destructive" size="icon" onClick={handleDelete}>
                 <Trash2 className="h-4 w-4" />
@@ -269,6 +278,13 @@ export default function RepairDetailPage() {
         open={showInvoiceDialog}
         onOpenChange={setShowInvoiceDialog}
         repair={repair}
+      />
+      {/* Edit Repair Dialog */}
+      <EditRepairDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        repair={repair}
+        onSuccess={fetchRepair}
       />
     </div>
   );

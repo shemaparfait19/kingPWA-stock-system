@@ -225,7 +225,7 @@ export function PartsUsed({ repair, onUpdate }: PartsUsedProps) {
                 <Input 
                   value={customName} 
                   onChange={(e) => setCustomName(e.target.value)} 
-                  placeholder="e.g. Purchased Screen"
+                  placeholder="e.g. Purchased Screen or Labor"
                 />
                </div>
                <div className="w-[120px]">
@@ -322,7 +322,7 @@ export function PartsUsed({ repair, onUpdate }: PartsUsedProps) {
                             </div>
                             <p className="text-sm text-muted-foreground group">
                                 {formatCurrency(part.unitCost)} × {part.quantity} = {formatCurrency(part.totalCost || (part.unitCost * part.quantity))}
-                                <span className="opacity-0 group-hover:opacity-100 ml-2 text-xs text-blue-500">Click to edit</span>
+                                <span className="ml-2 text-xs text-blue-500 font-medium">(Click to edit)</span>
                             </p>
                         </div>
                         <div className="flex gap-1">
