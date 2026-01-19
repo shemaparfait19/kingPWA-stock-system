@@ -28,9 +28,11 @@ export function EditRepairDialog({ open, onOpenChange, repair, onSuccess }: Edit
     serialNumber: repair.serialNumber || '',
     imei: repair.imei || '',
     problemDescription: repair.problemDescription || '',
+    estimatedCost: repair.estimatedCost || 0,
+    depositPaid: repair.depositPaid || 0,
   });
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -112,6 +114,25 @@ export function EditRepairDialog({ open, onOpenChange, repair, onSuccess }: Edit
                <Input 
                  value={formData.imei} 
                  onChange={(e) => handleChange('imei', e.target.value)} 
+               />
+             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div className="grid gap-2">
+               <Label>Estimated Cost (RWF)</Label>
+               <Input 
+                 type="number"
+                 value={formData.estimatedCost} 
+                 onChange={(e) => handleChange('estimatedCost', parseFloat(e.target.value) || 0)} 
+               />
+             </div>
+             <div className="grid gap-2">
+               <Label>Deposit Paid (RWF)</Label>
+               <Input 
+                 type="number"
+                 value={formData.depositPaid} 
+                 onChange={(e) => handleChange('depositPaid', parseFloat(e.target.value) || 0)} 
                />
              </div>
           </div>
