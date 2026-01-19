@@ -199,7 +199,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
         period: { start: startDate, end: endDate },
         daily: dailyReport,
-        summary
+        summary,
+        details: {
+            repairs,
+            sales,
+            expenses
+        }
     });
 
   } catch (error: any) {

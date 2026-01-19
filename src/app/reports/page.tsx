@@ -115,27 +115,111 @@ export default function ReportsPage() {
        )}
 
        {/* Tabs */}
-       <Tabs defaultValue="monthly" className="w-full">
-         <TabsList>
-           <TabsTrigger value="monthly">Monthly Summary (RAPOLO)</TabsTrigger>
-           <TabsTrigger value="daily">Daily Details</TabsTrigger>
+       <Tabs defaultValue="overview" className="w-full">
+         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
+           <TabsTrigger value="overview" className="py-2">Overview (RAPOLO)</TabsTrigger>
+           <TabsTrigger value="daily" className="py-2">Daily Ledger</TabsTrigger>
+           <TabsTrigger value="repairs" className="py-2">Repairs</TabsTrigger>
+           <TabsTrigger value="sales" className="py-2">Sales</TabsTrigger>
+           <TabsTrigger value="expenses" className="py-2">Expenses</TabsTrigger>
          </TabsList>
          
-         <TabsContent value="monthly">
-            {loading ? (
-                <div className="p-8 text-center text-muted-foreground">Loading report data...</div>
-            ) : (
-                <MonthlySummary data={data} />
-            )}
+         <TabsContent value="overview">
+            {loading ? <div className="p-8 text-center">Loading...</div> : <MonthlySummary data={data} />}
          </TabsContent>
          
          <TabsContent value="daily">
-            {loading ? (
-                <div className="p-8 text-center text-muted-foreground">Loading report data...</div>
-            ) : (
-                <DailyReportTable data={data} />
+            {loading ? <div className="p-8 text-center">Loading...</div> : <DailyReportTable data={data} />}
+         </TabsContent>
+         
+         <TabsContent value="repairs">
+            {/* Simple Repairs List View reused or custom table */}
+            {loading ? <div className="p-8 text-center">Loading...</div> : (
+                <Card>
+                    <CardHeader><CardTitle>Repairs Report</CardTitle></CardHeader>
+                    <CardContent>
+                        <div className="text-sm text-muted-foreground mb-4">
+                            Showing {data?.details?.repairs?.length || 0} repair jobs for this period.
+                        </div>
+                        {/* We could create a dedicated component, but for now reuse DailyTable logic or simple mapping */}
+                        <div className="border rounded-md">
+                         <table className="w-full text-sm">
+                             <thead className="bg-muted text-left"><tr className="border-b"><th className="p-2">Job #</th><th className="p-2">Date</th><th className="p-2">Device</th><th className="p-2">Tech</th><th className="p-2 text-right">Cost</th></tr></thead>
+                             <tbody>
+                                {data?.details?.repairs?.map((r: any) => (
+                                    <tr key={r.id} className="border-b">
+                                        <td className="p-2 font-medium">{r.jobNumber}</td>
+                                        <td className="p-2">{formatDateTime(r.createdAt)}</td>
+                                        <td className="p-2">{r.deviceType} {r.brand}</td>
+                                        <td className="p-2">{r.assignedUser?.fullName}</td>
+                                        <td className="p-2 text-right">{formatCurrency(r.actualCost)}</td>
+                                    </tr>
+                                ))}
+                             </tbody>
+                         </table>
+                        </div>
+                    </CardContent>
+                </Card>
             )}
          </TabsContent>
+
+          <TabsContent value="sales">
+            {loading ? <div className="p-8 text-center">Loading...</div> : (
+                <Card>
+                    <CardHeader><CardTitle>Sales Report</CardTitle></CardHeader>
+                    <CardContent>
+                        <div className="text-sm text-muted-foreground mb-4">
+                            Showing {data?.details?.sales?.length || 0} sales for this period.
+                        </div>
+                        <div className="border rounded-md">
+                         <table className="w-full text-sm">
+                             <thead className="bg-muted text-left"><tr className="border-b"><th className="p-2">Inv #</th><th className="p-2">Date</th><th className="p-2">Items</th><th className="p-2">Seller</th><th className="p-2 text-right">Total</th></tr></thead>
+                             <tbody>
+                                {data?.details?.sales?.map((s: any) => (
+                                    <tr key={s.id} className="border-b">
+                                        <td className="p-2 font-medium">{s.invoiceNumber}</td>
+                                        <td className="p-2">{formatDateTime(s.saleDate)}</td>
+                                        <td className="p-2">{s.items?.length} items</td>
+                                        <td className="p-2">{s.user?.fullName}</td>
+                                        <td className="p-2 text-right">{formatCurrency(s.total)}</td>
+                                    </tr>
+                                ))}
+                             </tbody>
+                         </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+         </TabsContent>
+
+         <TabsContent value="expenses">
+            {loading ? <div className="p-8 text-center">Loading...</div> : (
+                <Card>
+                    <CardHeader><CardTitle>Expenses Report</CardTitle></CardHeader>
+                    <CardContent>
+                        <div className="text-sm text-muted-foreground mb-4">
+                            Showing {data?.details?.expenses?.length || 0} expenses for this period.
+                        </div>
+                        <div className="border rounded-md">
+                         <table className="w-full text-sm">
+                             <thead className="bg-muted text-left"><tr className="border-b"><th className="p-2">Date</th><th className="p-2">Category</th><th className="p-2">Description</th><th className="p-2 text-right">Amount</th></tr></thead>
+                             <tbody>
+                                {data?.details?.expenses?.map((e: any) => (
+                                    <tr key={e.id} className="border-b">
+                                        <td className="p-2">{formatDateTime(e.expenseDate)}</td>
+                                        <td className="p-2"><Badge variant="outline">{e.category}</Badge></td>
+                                        <td className="p-2">{e.description}</td>
+                                        <td className="p-2 text-right">{formatCurrency(e.amount)}</td>
+                                    </tr>
+                                ))}
+                             </tbody>
+                         </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+         </TabsContent>
+
        </Tabs>
      </div>
   );
