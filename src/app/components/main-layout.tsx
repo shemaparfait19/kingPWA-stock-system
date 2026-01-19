@@ -25,6 +25,7 @@ import {
   ShoppingCart,
   BarChart3,
   Settings,
+  Menu,
   Crown,
   Calendar,
 } from 'lucide-react';
