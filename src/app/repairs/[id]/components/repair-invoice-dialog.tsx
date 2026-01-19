@@ -100,7 +100,13 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
 
     // Totals
     const finalY = (doc as any).lastAutoTable.finalY || 110;
-    const total = repair.actualCost || repair.estimatedCost;
+    
+    // Calculate total from parts
+    const partsTotal = repair.partsUsed?.reduce((sum: number, part: any) => {
+        return sum + (part.totalCost || (part.unitCost * part.quantity) || 0);
+    }, 0) || 0;
+
+    const total = partsTotal > 0 ? partsTotal + (repair.laborCost || 0) : (repair.actualCost || repair.estimatedCost);
     const paid = repair.depositPaid || 0;
     const balance = total - paid;
 
@@ -152,7 +158,13 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
     }
   };
 
-  const total = repair.actualCost || repair.estimatedCost;
+  // Calculate total from parts to ensure accuracy even if DB is stale
+  const partsTotal = repair.partsUsed?.reduce((sum: number, part: any) => {
+    return sum + (part.totalCost || (part.unitCost * part.quantity) || 0);
+  }, 0) || 0;
+
+  // Use parts total if we have parts, otherwise fallback to existing fields
+  const total = partsTotal > 0 ? partsTotal + (repair.laborCost || 0) : (repair.actualCost || repair.estimatedCost);
   const paid = repair.depositPaid || 0;
   const balance = total - paid;
 
