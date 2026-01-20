@@ -13,8 +13,13 @@ import { Loader2, Calendar } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths } from 'date-fns';
 
-// ... inside component ...
-
+export default function ReportsPage() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
+  
+  // Date Range State (Default to current month)
+  const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
   const [dateRange, setDateRange] = useState('month');
 
   const handleRangeChange = (value: string) => {
@@ -52,7 +57,27 @@ import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, end
     setEndDate(format(end, 'yyyy-MM-dd'));
   };
 
-  // ... fetchReports ...
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      const query = new URLSearchParams({ startDate, endDate }).toString();
+      const res = await fetch(`/api/reports/financials?${query}`);
+      const reportData = await res.json();
+      if (res.ok) {
+        setData(reportData);
+      } else {
+        console.error('Failed to fetch reports:', reportData.error);
+      }
+    } catch (e) {
+      console.error('Error fetching reports:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []); // Initial load
 
   return (
      <div className="space-y-6">
