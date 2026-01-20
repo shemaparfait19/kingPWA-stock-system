@@ -198,17 +198,52 @@ export default function ReportsPage() {
                         {/* We could create a dedicated component, but for now reuse DailyTable logic or simple mapping */}
                         <div className="border rounded-md">
                          <table className="w-full text-sm">
-                             <thead className="bg-muted text-left"><tr className="border-b"><th className="p-2">Job #</th><th className="p-2">Date</th><th className="p-2">Device</th><th className="p-2">Tech</th><th className="p-2 text-right">Cost</th></tr></thead>
+                             <thead className="bg-muted text-left">
+                                 <tr className="border-b">
+                                     <th className="p-2">Job #</th>
+                                     <th className="p-2">Date</th>
+                                     <th className="p-2">Device</th>
+                                     <th className="p-2">Tech</th>
+                                     <th className="p-2 w-1/3">Parts Used</th>
+                                     <th className="p-2 text-right">Revenue</th>
+                                     <th className="p-2 text-right">Parts Cost</th>
+                                     <th className="p-2 text-right">Profit</th>
+                                 </tr>
+                             </thead>
                              <tbody>
-                                {data?.details?.repairs?.map((r: any) => (
-                                    <tr key={r.id} className="border-b">
-                                        <td className="p-2 font-medium">{r.jobNumber}</td>
-                                        <td className="p-2">{formatDateTime(r.createdAt)}</td>
-                                        <td className="p-2">{r.deviceType} {r.brand}</td>
-                                        <td className="p-2">{r.assignedUser?.fullName}</td>
-                                        <td className="p-2 text-right">{formatCurrency(r.actualCost)}</td>
-                                    </tr>
-                                ))}
+                                {data?.details?.repairs?.map((r: any) => {
+                                    const partsCost = r.partsUsed?.reduce((sum: number, p: any) => sum + (p.totalCost || (p.unitCost * p.quantity) || 0), 0) || 0;
+                                    const revenue = r.actualCost || 0;
+                                    const profit = revenue - partsCost;
+                                    
+                                    return (
+                                        <tr key={r.id} className="border-b align-top hover:bg-muted/10">
+                                            <td className="p-2 font-medium whitespace-nowrap">{r.jobNumber}</td>
+                                            <td className="p-2 whitespace-nowrap">{formatDateTime(r.createdAt)}</td>
+                                            <td className="p-2">{r.deviceType} <span className="text-muted-foreground">{r.brand}</span></td>
+                                            <td className="p-2 whitespace-nowrap">{r.assignedUser?.fullName}</td>
+                                            <td className="p-2">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {r.partsUsed && r.partsUsed.length > 0 ? (
+                                                        r.partsUsed.map((p: any) => (
+                                                            <Badge key={p.id} variant="secondary" className="font-normal text-xs whitespace-nowrap">
+                                                                {p.customName || p.inventoryItem?.name || 'Part'} 
+                                                                <span className="ml-1 text-muted-foreground">({formatCurrency(p.totalCost || (p.unitCost * p.quantity))})</span>
+                                                            </Badge>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-muted-foreground text-xs text-italic">No parts</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="p-2 text-right font-medium text-green-700">{formatCurrency(revenue)}</td>
+                                            <td className="p-2 text-right text-orange-600">{formatCurrency(partsCost)}</td>
+                                            <td className={`p-2 text-right font-bold ${profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                                {formatCurrency(profit)}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                              </tbody>
                          </table>
                         </div>
