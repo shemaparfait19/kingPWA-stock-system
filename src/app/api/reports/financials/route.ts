@@ -150,12 +150,21 @@ export async function GET(request: NextRequest) {
     });
 
     // Process Sales
+    // Process Sales
     sales.forEach(sale => {
         const revenue = sale.total;
         let partsCost = 0;
         sale.items.forEach(lineItem => {
             partsCost += (lineItem.item?.unitCost || 0) * lineItem.quantity;
         });
+
+        const profit = revenue - partsCost;
+
+        // Attach details for Frontend Report
+        // @ts-ignore
+        sale.cogs = partsCost;
+        // @ts-ignore
+        sale.profit = profit;
 
         const entry = getDayEntry(sale.saleDate);
         const tech = getTechEntry(entry, sale.user);

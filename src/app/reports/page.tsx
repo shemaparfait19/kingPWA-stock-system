@@ -262,15 +262,47 @@ export default function ReportsPage() {
                         </div>
                         <div className="border rounded-md">
                          <table className="w-full text-sm">
-                             <thead className="bg-muted text-left"><tr className="border-b"><th className="p-2">Inv #</th><th className="p-2">Date</th><th className="p-2">Items</th><th className="p-2">Seller</th><th className="p-2 text-right">Total</th></tr></thead>
+                             <thead className="bg-muted text-left">
+                                 <tr className="border-b">
+                                     <th className="p-2">Inv #</th>
+                                     <th className="p-2">Date</th>
+                                     <th className="p-2">Seller</th>
+                                     <th className="p-2 w-1/3">Items Sold</th>
+                                     <th className="p-2 text-right">Revenue</th>
+                                     <th className="p-2 text-right">Cost (COGS)</th>
+                                     <th className="p-2 text-right">Profit</th>
+                                 </tr>
+                             </thead>
                              <tbody>
                                 {data?.details?.sales?.map((s: any) => (
-                                    <tr key={s.id} className="border-b">
-                                        <td className="p-2 font-medium">{s.invoiceNumber}</td>
-                                        <td className="p-2">{formatDateTime(s.saleDate)}</td>
-                                        <td className="p-2">{s.items?.length} items</td>
-                                        <td className="p-2">{s.user?.fullName}</td>
-                                        <td className="p-2 text-right">{formatCurrency(s.total)}</td>
+                                    <tr key={s.id} className="border-b align-top hover:bg-muted/10">
+                                        <td className="p-2 font-medium whitespace-nowrap">{s.invoiceNumber}</td>
+                                        <td className="p-2 whitespace-nowrap">{formatDateTime(s.saleDate)}</td>
+                                        <td className="p-2 whitespace-nowrap">{s.user?.fullName}</td>
+                                        <td className="p-2">
+                                            <div className="flex flex-col gap-1">
+                                                {s.items?.map((item: any, idx: number) => {
+                                                    const cost = (item.item?.unitCost || 0) * item.quantity;
+                                                    const price = item.price * item.quantity; // item.price is unit price at sale? Schema says SalesItem price is Float. Usually unit price.
+                                                    // Let's assume item.price is unit price.
+                                                    // profit = price - cost
+                                                    return (
+                                                        <div key={idx} className="flex justify-between items-center text-xs border rounded p-1 bg-background">
+                                                            <span>{item.item?.name} <span className="text-muted-foreground">x{item.quantity}</span></span>
+                                                            <span className="font-mono">
+                                                                {formatCurrency(price)} 
+                                                                <span className="text-orange-600 ml-1" title="Cost">({formatCurrency(cost)})</span>
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        </td>
+                                        <td className="p-2 text-right font-medium text-green-700">{formatCurrency(s.total)}</td>
+                                        <td className="p-2 text-right text-orange-600">{formatCurrency(s.cogs || 0)}</td>
+                                        <td className={`p-2 text-right font-bold ${s.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                            {formatCurrency(s.profit || 0)}
+                                        </td>
                                     </tr>
                                 ))}
                              </tbody>
@@ -279,7 +311,7 @@ export default function ReportsPage() {
                     </CardContent>
                 </Card>
             )}
-         </TabsContent>
+          </TabsContent>
 
          <TabsContent value="expenses">
             {loading ? <div className="p-8 text-center">Loading...</div> : (
