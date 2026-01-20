@@ -116,19 +116,34 @@ export async function GET(request: NextRequest) {
 
     // Process Repairs
     repairs.forEach(repair => {
-        const revenue = repair.actualCost;
-        let partsCost = 0;
+        let partsTotal = 0;
         repair.partsUsed.forEach(part => {
-             partsCost += part.totalCost || (part.unitCost * part.quantity) || 0;
+             partsTotal += part.totalCost || (part.unitCost * part.quantity) || 0;
         });
+
+        // Self-heal: If actualCost is missing, try to derive it
+        // Priority: existing actualCost > estimatedCost > sum of parts
+        let effectiveRevenue = repair.actualCost;
+        if (!effectiveRevenue || effectiveRevenue === 0) {
+             if (repair.estimatedCost && repair.estimatedCost > 0) {
+                 effectiveRevenue = repair.estimatedCost;
+             } else {
+                 effectiveRevenue = partsTotal;
+             }
+             // Update the object so the frontend "Repairs" detail list shows this value
+             // @ts-ignore
+             repair.actualCost = effectiveRevenue;
+        }
+
+        const partsCost = partsTotal; // This is the Cost of Goods
 
         const entry = getDayEntry(repair.createdAt);
         const tech = getTechEntry(entry, repair.assignedUser);
 
-        entry.income += revenue;
+        entry.income += effectiveRevenue;
         entry.partsCost += partsCost;
         
-        tech.revenue += revenue;
+        tech.revenue += effectiveRevenue;
         tech.partsCost += partsCost;
         tech.grossProfit = tech.revenue - tech.partsCost;
         // Quota check happens at end of aggregation
