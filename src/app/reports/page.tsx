@@ -323,14 +323,26 @@ export default function ReportsPage() {
                         </div>
                         <div className="border rounded-md">
                          <table className="w-full text-sm">
-                             <thead className="bg-muted text-left"><tr className="border-b"><th className="p-2">Date</th><th className="p-2">Category</th><th className="p-2">Description</th><th className="p-2 text-right">Amount</th></tr></thead>
+                             <thead className="bg-muted text-left">
+                                 <tr className="border-b">
+                                     <th className="p-2">Date</th>
+                                     <th className="p-2">Category</th>
+                                     <th className="p-2">Description</th>
+                                     <th className="p-2">Recorded By</th>
+                                     <th className="p-2 text-right">Amount</th>
+                                 </tr>
+                             </thead>
                              <tbody>
                                 {data?.details?.expenses?.map((e: any) => (
-                                    <tr key={e.id} className="border-b">
-                                        <td className="p-2">{formatDateTime(e.expenseDate)}</td>
+                                    <tr key={e.id} className="border-b hover:bg-muted/10">
+                                        <td className="p-2 whitespace-nowrap">{formatDateTime(e.expenseDate)}</td>
                                         <td className="p-2"><Badge variant="outline">{e.category}</Badge></td>
-                                        <td className="p-2">{e.description}</td>
-                                        <td className="p-2 text-right">{formatCurrency(e.amount)}</td>
+                                        <td className="p-2">
+                                            {e.description}
+                                            {e.notes && <div className="text-xs text-muted-foreground mt-1">{e.notes}</div>}
+                                        </td>
+                                        <td className="p-2 whitespace-nowrap">{e.user?.fullName || 'Unknown'}</td>
+                                        <td className="p-2 text-right font-bold text-red-600">{formatCurrency(e.amount)}</td>
                                     </tr>
                                 ))}
                              </tbody>

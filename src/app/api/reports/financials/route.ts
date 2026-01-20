@@ -72,6 +72,9 @@ export async function GET(request: NextRequest) {
           gte: startOfDay(startDate),
           lte: endOfDay(endDate)
         }
+      },
+      include: {
+        user: true
       }
     });
 
