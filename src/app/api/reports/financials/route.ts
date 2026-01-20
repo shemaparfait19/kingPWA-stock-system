@@ -88,10 +88,10 @@ export async function GET(request: NextRequest) {
         if (!dailyMap.has(key)) {
             dailyMap.set(key, {
                 date: key,
-                income: 0,
-                loss: 0, // Costs (Parts + Expenses)
+                income: 0, // Revenue
+                partsCost: 0, // COGS
                 expenses: 0,
-                technicians: {} // { 'UserId': { name: 'King', income: 0, loss: 0 } }
+                technicians: {} 
             });
         }
         return dailyMap.get(key);
@@ -101,13 +101,14 @@ export async function GET(request: NextRequest) {
     const getTechEntry = (dayEntry: any, user: any) => {
         const userId = user?.id || 'unknown';
         const userName = user?.fullName || 'Unknown';
-        // Map user "Alex" or "King" based on name parsing if needed, but fullName is safer.
         
         if (!dayEntry.technicians[userId]) {
             dayEntry.technicians[userId] = {
                 name: userName,
-                income: 0,
-                loss: 0
+                revenue: 0, 
+                partsCost: 0,
+                grossProfit: 0,
+                quotaShortfall: 0 // "Loss" against 12,500
             };
         }
         return dayEntry.technicians[userId];
@@ -115,55 +116,61 @@ export async function GET(request: NextRequest) {
 
     // Process Repairs
     repairs.forEach(repair => {
-        // Calculate Repair Income (Actual Cost)
-        // If Actual Cost is 0 (pending), use Estimated? No, report assumes finalized.
-        // We only count it if it has cost.
-        const income = repair.actualCost;
-        
-        // Calculate Repair Loss (Parts Cost)
+        const revenue = repair.actualCost;
         let partsCost = 0;
         repair.partsUsed.forEach(part => {
              partsCost += part.totalCost || (part.unitCost * part.quantity) || 0;
         });
 
-        const entry = getDayEntry(repair.createdAt); // Group by Created Date
+        const entry = getDayEntry(repair.createdAt);
         const tech = getTechEntry(entry, repair.assignedUser);
 
-        entry.income += income;
-        entry.loss += partsCost;
+        entry.income += revenue;
+        entry.partsCost += partsCost;
         
-        tech.income += income;
-        tech.loss += partsCost;
+        tech.revenue += revenue;
+        tech.partsCost += partsCost;
+        tech.grossProfit = tech.revenue - tech.partsCost;
+        // Quota check happens at end of aggregation
     });
 
     // Process Sales
     sales.forEach(sale => {
-        const income = sale.total; // Sale Total
-        
-        // Calculate COGS (Cost of parts sold)
-        let cogs = 0;
+        const revenue = sale.total;
+        let partsCost = 0;
         sale.items.forEach(lineItem => {
-            // Unit cost derived from original item if possible.
-            // SalesItem doesn't store historical unitCost. We check current item.unitCost
-            // This is an approximation if cost changed, but best we have.
-            cogs += (lineItem.item?.unitCost || 0) * lineItem.quantity;
+            partsCost += (lineItem.item?.unitCost || 0) * lineItem.quantity;
         });
 
         const entry = getDayEntry(sale.saleDate);
         const tech = getTechEntry(entry, sale.user);
 
-        entry.income += income;
-        entry.loss += cogs;
+        entry.income += revenue;
+        entry.partsCost += partsCost;
 
-        tech.income += income;
-        tech.loss += cogs;
+        tech.revenue += revenue;
+        tech.partsCost += partsCost;
+        tech.grossProfit = tech.revenue - tech.partsCost;
     });
 
     // Process Expenses
     expenses.forEach(expense => {
         const entry = getDayEntry(expense.expenseDate);
         entry.expenses += expense.amount;
-        entry.loss += expense.amount; // Expenses count towards total "Loss" (Outflow)
+    });
+
+    // Post-Process Quota Logic (12,500 RWF Target)
+    const DAILY_QUOTA = 12500;
+    
+    dailyMap.forEach(day => {
+        Object.values(day.technicians).forEach((t: any) => {
+             // Logic: If they worked (have entry), check quota.
+             // Loss = Max(0, 12500 - GrossProfit)
+             t.quotaShortfall = Math.max(0, DAILY_QUOTA - t.grossProfit);
+             
+             // For the RAPOLO view "Income" column usually means "Money they brought in" (Gross Profit)
+             // And "Loss" means "Shortfall".
+        });
     });
 
     // Convert Map to sorted Array
@@ -171,30 +178,38 @@ export async function GET(request: NextRequest) {
 
     // Calculate Summary/Totals
     const summary = {
-        totalIncome: 0,
-        totalLoss: 0,
+        totalRevenue: 0,
+        totalPartsCost: 0,
         totalExpenses: 0,
-        netProfit: 0,
+        totalQuotaShortfall: 0,
+        netProfit: 0, // Genuine business profit
         byTechnician: {} as any
     };
 
     dailyReport.forEach(day => {
-        summary.totalIncome += day.income;
-        summary.totalLoss += day.loss;
+        summary.totalRevenue += day.income;
+        summary.totalPartsCost += day.partsCost;
         summary.totalExpenses += day.expenses;
         
-        // Aggregate Tech totals
         Object.values(day.technicians).forEach((t: any) => {
+            summary.totalQuotaShortfall += t.quotaShortfall;
+
             if (!summary.byTechnician[t.name]) {
-                summary.byTechnician[t.name] = { income: 0, loss: 0, profit: 0 };
+                summary.byTechnician[t.name] = { revenue: 0, partsCost: 0, grossProfit: 0, quotaShortfall: 0 };
             }
-            summary.byTechnician[t.name].income += t.income;
-            summary.byTechnician[t.name].loss += t.loss;
-            summary.byTechnician[t.name].profit += (t.income - t.loss);
+            summary.byTechnician[t.name].revenue += t.revenue;
+            summary.byTechnician[t.name].partsCost += t.partsCost;
+            summary.byTechnician[t.name].grossProfit += t.grossProfit;
+            summary.byTechnician[t.name].quotaShortfall += t.quotaShortfall;
         });
     });
 
-    summary.netProfit = summary.totalIncome - summary.totalLoss;
+    // Net Profit for Business = (Total Revenue - Total Parts Cost - Expenses)
+    // The "Quota Shortfall" is a metric for the *Technician*, not necessarily a cash loss for the business (unless they pay it).
+    // The User's report shows "Balance" day by day.
+    // User Balance Row: "51,000 (Income) | 10,000 (Loss??) | 46,400 (Balance?)"
+    // Let's stick to standard Accounting Profit for the "Balance" column: Revenue - Parts - Expenses.
+    summary.netProfit = summary.totalRevenue - summary.totalPartsCost - summary.totalExpenses;
 
     return NextResponse.json({
         period: { start: startDate, end: endDate },

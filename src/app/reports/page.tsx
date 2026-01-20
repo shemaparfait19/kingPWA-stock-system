@@ -10,37 +10,49 @@ import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { MonthlySummary } from './components/monthly-summary';
 import { DailyReportTable } from './components/daily-report-table';
 import { Loader2, Calendar } from 'lucide-react';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths } from 'date-fns';
 
-export default function ReportsPage() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
-  
-  // Date Range State (Default to current month)
-  const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
-  const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+// ... inside component ...
 
-  const fetchReports = async () => {
-    setLoading(true);
-    try {
-      const query = new URLSearchParams({ startDate, endDate }).toString();
-      const res = await fetch(`/api/reports/financials?${query}`);
-      const reportData = await res.json();
-      if (res.ok) {
-        setData(reportData);
-      } else {
-        console.error('Failed to fetch reports:', reportData.error);
-      }
-    } catch (e) {
-      console.error('Error fetching reports:', e);
-    } finally {
-      setLoading(false);
+  const [dateRange, setDateRange] = useState('month');
+
+  const handleRangeChange = (value: string) => {
+    setDateRange(value);
+    const now = new Date();
+    let start = now;
+    let end = now;
+
+    switch (value) {
+      case 'today':
+        start = startOfDay(now);
+        end = endOfDay(now);
+        break;
+      case 'week':
+        start = startOfWeek(now, { weekStartsOn: 1 }); // Monday start
+        end = endOfWeek(now, { weekStartsOn: 1 });
+        break;
+      case 'month':
+        start = startOfMonth(now);
+        end = endOfMonth(now);
+        break;
+      case 'last_month':
+        const lastMonth = subMonths(now, 1);
+        start = startOfMonth(lastMonth);
+        end = endOfMonth(lastMonth);
+        break;
+      case 'year':
+        start = startOfYear(now);
+        end = endOfYear(now);
+        break;
+      case 'custom':
+        return; // Don't change dates, let user pick
     }
+    setStartDate(format(start, 'yyyy-MM-dd'));
+    setEndDate(format(end, 'yyyy-MM-dd'));
   };
 
-  useEffect(() => {
-    fetchReports();
-  }, []); // Initial load
+  // ... fetchReports ...
 
   return (
      <div className="space-y-6">
@@ -48,14 +60,30 @@ export default function ReportsPage() {
          <h2 className="text-3xl font-bold tracking-tight">Financial Reports</h2>
          
          {/* Date Filter */}
-         <div className="flex items-end gap-2 bg-card p-2 rounded-lg border shadow-sm">
+         <div className="flex flex-wrap items-end gap-2 bg-card p-2 rounded-lg border shadow-sm">
+            <div className="w-[140px]">
+                <Label className="text-xs mb-1 block">Period</Label>
+                <Select value={dateRange} onValueChange={handleRangeChange}>
+                    <SelectTrigger className="h-8">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="week">This Week</SelectItem>
+                        <SelectItem value="month">This Month</SelectItem>
+                        <SelectItem value="last_month">Last Month</SelectItem>
+                        <SelectItem value="year">This Year</SelectItem>
+                        <SelectItem value="custom">Custom Range</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
             <div>
                 <Label className="text-xs">Start Date</Label>
                 <Input 
                     type="date" 
                     value={startDate} 
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="h-8 w-[140px]" 
+                    onChange={(e) => { setStartDate(e.target.value); setDateRange('custom'); }}
+                    className="h-8 w-[130px]" 
                 />
             </div>
             <div>
@@ -63,13 +91,13 @@ export default function ReportsPage() {
                 <Input 
                     type="date" 
                     value={endDate} 
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="h-8 w-[140px]" 
+                    onChange={(e) => { setEndDate(e.target.value); setDateRange('custom'); }}
+                    className="h-8 w-[130px]" 
                 />
             </div>
             <Button size="sm" onClick={fetchReports} disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calendar className="h-4 w-4 mr-2" />}
-                Run Report
+                Run
             </Button>
          </div>
        </div>
@@ -79,18 +107,18 @@ export default function ReportsPage() {
          <div className="grid gap-4 md:grid-cols-4">
            <Card>
              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-               <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
              </CardHeader>
              <CardContent>
-               <div className="text-2xl font-bold text-green-600">{formatCurrency(data.summary.totalIncome)}</div>
+               <div className="text-2xl font-bold text-green-600">{formatCurrency(data.summary.totalRevenue)}</div>
              </CardContent>
            </Card>
            <Card>
              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-               <CardTitle className="text-sm font-medium">Parts & Costs (Loss)</CardTitle>
+               <CardTitle className="text-sm font-medium">Parts Cost (COGS)</CardTitle>
              </CardHeader>
              <CardContent>
-               <div className="text-2xl font-bold text-orange-600">{formatCurrency(data.summary.totalLoss - data.summary.totalExpenses)}</div>
+               <div className="text-2xl font-bold text-orange-600">{formatCurrency(data.summary.totalPartsCost)}</div>
              </CardContent>
            </Card>
            <Card>
