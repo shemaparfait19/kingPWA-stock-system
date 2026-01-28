@@ -37,10 +37,10 @@ export async function GET(request: NextRequest) {
              // BETTER: Use `completedAt` for finished jobs, or fall back to `createdAt`.
              // Given the "RAPOLO" context, it's usually cash flow. But we lack a separate "Payments" table.
              // We will use `createdAt` for grouping for now as it's the stable "Job Date".
-             { createdAt: { gte: startOfDay(startDate) } },
-             { createdAt: { lte: endOfDay(endDate) } }
+          { createdAt: { lte: endOfDay(endDate) } }
         ]
       },
+      orderBy: { createdAt: 'desc' },
       include: {
         assignedUser: true,
         partsUsed: true

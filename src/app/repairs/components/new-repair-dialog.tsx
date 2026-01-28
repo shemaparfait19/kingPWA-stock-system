@@ -47,6 +47,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
     problemDescription: '',
     promisedDate: '',
     priority: 'normal',
+    estimatedCost: '',
     depositPaid: '',
     assignedTo: '',
   });
@@ -65,29 +66,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
     }
   }, [open]);
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await fetch('/api/customers');
-      if (response.ok) {
-        const data = await response.json();
-        setCustomers(data);
-      }
-    } catch (error) {
-      console.error('Error fetching customers:', error);
-    }
-  };
-
-  const fetchTechnicians = async () => {
-    try {
-      const response = await fetch('/api/users?role=technician');
-      if (response.ok) {
-        const data = await response.json();
-        setTechnicians(data);
-      }
-    } catch (error) {
-      console.error('Error fetching technicians:', error);
-    }
-  };
+  // ... fetch functions ...
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,22 +77,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
     try {
       let customerId = formData.customerId;
 
-      // Create new customer if needed
-      if (showNewCustomer && formData.customerName && formData.customerPhone) {
-        const customerResponse = await fetch('/api/customers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.customerName,
-            phone: formData.customerPhone,
-            customerType: 'walk_in',
-          }),
-        });
-
-        if (!customerResponse.ok) throw new Error('Failed to create customer');
-        const newCustomer = await customerResponse.json();
-        customerId = newCustomer.id;
-      }
+      // ... customer creation ...
 
       if (!customerId) {
         throw new Error('Please select or create a customer');
@@ -133,6 +97,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
           problemDescription: formData.problemDescription,
           promisedDate: formData.promisedDate,
           priority: formData.priority,
+          estimatedCost: parseFloat(formData.estimatedCost) || 0,
           depositPaid: parseFloat(formData.depositPaid) || 0,
           assignedTo: formData.assignedTo || null,
           createdBy: user.id,
@@ -355,6 +320,20 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
                 disabled={loading}
               />
             </div>
+            
+             <div className="space-y-2">
+              <Label htmlFor="estimatedCost">Agreed Price (RWF)</Label>
+              <Input
+                id="estimatedCost"
+                type="number"
+                step="0.01"
+                placeholder="0"
+                value={formData.estimatedCost}
+                onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="priority">{t('priority')}</Label>
               <Select

@@ -18,25 +18,29 @@ export async function updateRepairFinancials(repairId: string) {
         return sum + cost;
     }, 0);
 
-    // 3. Get current repair to check deposit
+    // 3. Get current repair to check deposit and estimated cost
     const repair = await prisma.repairJob.findUnique({
         where: { id: repairId },
-        select: { depositPaid: true }
+        select: { depositPaid: true, estimatedCost: true }
     });
 
     if (!repair) return;
 
     const deposit = repair.depositPaid || 0;
-    const balance = totalPartsCost - deposit;
+    const estimatedCost = repair.estimatedCost || 0;
+    
+    // Logic: If estimated cost (agreed price) is set, use it as final revenue.
+    // Otherwise, default to sum of parts.
+    const finalRevenue = estimatedCost > 0 ? estimatedCost : totalPartsCost;
+    
+    const balance = finalRevenue - deposit;
 
     // 4. Update the repair job
     await prisma.repairJob.update({
       where: { id: repairId },
       data: {
-        actualCost: totalPartsCost,
+        actualCost: finalRevenue,
         balance: balance,
-        // Optional: Update estimated cost if specific logic requires, 
-        // but typically estimated is manual and actual is calculated.
       },
     });
 
