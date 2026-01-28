@@ -70,6 +70,40 @@ export async function PATCH(
 
     const body = await request.json();
 
+    // If estimatedCost is being updated, sync actualCost and recalculate balance
+    if (body.estimatedCost !== undefined) {
+      const currentRepair = await prisma.repairJob.findUnique({
+        where: { id: params.id },
+        select: { depositPaid: true, estimatedCost: true }
+      });
+
+      if (currentRepair) {
+        const newEstimatedCost = parseFloat(body.estimatedCost) || 0;
+        const deposit = body.depositPaid !== undefined ? parseFloat(body.depositPaid) : (currentRepair.depositPaid || 0);
+        
+        // If estimatedCost is set, use it as actualCost
+        // This ensures reports show the agreed price, not parts cost
+        if (newEstimatedCost > 0) {
+          body.actualCost = newEstimatedCost;
+          body.balance = newEstimatedCost - deposit;
+        }
+      }
+    }
+
+    // If only depositPaid is updated (without estimatedCost), recalculate balance
+    if (body.depositPaid !== undefined && body.estimatedCost === undefined) {
+      const currentRepair = await prisma.repairJob.findUnique({
+        where: { id: params.id },
+        select: { actualCost: true, estimatedCost: true }
+      });
+
+      if (currentRepair) {
+        const deposit = parseFloat(body.depositPaid) || 0;
+        const cost = currentRepair.estimatedCost || currentRepair.actualCost || 0;
+        body.balance = cost - deposit;
+      }
+    }
+
     const repair = await prisma.repairJob.update({
       where: { id: params.id },
       data: body,
