@@ -66,7 +66,29 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
     }
   }, [open]);
 
-  // ... fetch functions ...
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch('/api/customers');
+      if (response.ok) {
+        const data = await response.json();
+        setCustomers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+    }
+  };
+
+  const fetchTechnicians = async () => {
+    try {
+      const response = await fetch('/api/users?role=technician');
+      if (response.ok) {
+        const data = await response.json();
+        setTechnicians(data);
+      }
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +99,22 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
     try {
       let customerId = formData.customerId;
 
-      // ... customer creation ...
+      // Create new customer if needed
+      if (showNewCustomer && formData.customerName && formData.customerPhone) {
+        const customerResponse = await fetch('/api/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.customerName,
+            phone: formData.customerPhone,
+            customerType: 'walk_in',
+          }),
+        });
+
+        if (!customerResponse.ok) throw new Error('Failed to create customer');
+        const newCustomer = await customerResponse.json();
+        customerId = newCustomer.id;
+      }
 
       if (!customerId) {
         throw new Error('Please select or create a customer');
@@ -140,6 +177,7 @@ export function NewRepairDialog({ open, onOpenChange, onSuccess }: NewRepairDial
       problemDescription: '',
       promisedDate: '',
       priority: 'normal',
+      estimatedCost: '',
       depositPaid: '',
       assignedTo: '',
     });
