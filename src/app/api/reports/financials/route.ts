@@ -6,8 +6,14 @@ import { startOfDay, endOfDay, parseISO, format, isValid } from 'date-fns';
 export async function GET(request: NextRequest) {
   try {
     const session = await getSessionUser(request);
-    if (!session || !['owner', 'manager'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!['owner', 'manager'].includes(session.user.role)) {
+      console.warn(`Access denied to Financials for user ${session.user.id} with role ${session.user.role}`);
+      return NextResponse.json({ error: 'Forbidden: Access restricted to owners and managers' }, { status: 403 });
     }
 
     const searchParams = request.nextUrl.searchParams;

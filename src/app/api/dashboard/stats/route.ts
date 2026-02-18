@@ -1,9 +1,15 @@
 // API route for dashboard stats
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionUser } from '@/lib/auth-helper';
 import { getDashboardStats } from '@/lib/data-service';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSessionUser(request);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const stats = await getDashboardStats();
     return NextResponse.json(stats);
   } catch (error: any) {

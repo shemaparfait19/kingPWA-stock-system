@@ -1,52 +1,24 @@
-import { getToken } from "next-auth/jwt";
-import { NextRequest } from "next/server";
+import { auth } from "./auth";
 import { prisma } from "./prisma";
+import { NextRequest } from "next/server";
 
 /**
- * Retrieves the fully authenticated user from the database based on the session token.
- * This bypasses NextAuth's internal session cache to ensure permissions are real-time
- * and verifies against the actual database table.
+ * Retrieves the fully authenticated user from the database based on the active session.
+ * This verifies the session against the actual database table to ensure permissions 
+ * are real-time and the user account is still active.
  */
-export async function getSessionUser(request: NextRequest) {
+export async function getSessionUser(request?: NextRequest) {
   try {
-    // 1. Get the token from the cookie
-    // We try secret from process.env.AUTH_SECRET (standard) or NEXTAUTH_SECRET (legacy)
-    const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-    
-    if (!secret) {
-        console.error("AUTH_SECRET is not set");
-        return null;
-    }
+    // 1. Get the session using NextAuth v5 auth()
+    const session = await auth();
 
-    // Try standard retrieval first (NextAuth auto-detects based on NEXTAUTH_URL/NODE_ENV usually)
-    let token = await getToken({ req: request, secret });
-
-    // If that fails, try forcibly looking for the production secure cookie
-    if (!token) {
-        token = await getToken({ 
-            req: request, 
-            secret, 
-            salt: "__Secure-next-auth.session-token"
-        });
-    }
-
-    // If that fails, try forcibly looking for the dev cookie
-    if (!token) {
-        token = await getToken({ 
-            req: request, 
-            secret, 
-            salt: "next-auth.session-token"
-        });
-    }
-
-    if (!token || !token.sub) {
-      console.warn("getSessionUser: No token found. Cookies:", request.headers.get("cookie"));
+    if (!session || !session.user || !session.user.id) {
       return null;
     }
 
-    // 2. Query the database directly
+    // 2. Query the database directly for the most up-to-date user state
     const user = await prisma.user.findUnique({
-      where: { id: token.sub },
+      where: { id: session.user.id },
       select: {
           id: true,
           email: true,
@@ -57,16 +29,16 @@ export async function getSessionUser(request: NextRequest) {
     });
 
     if (!user) {
-         console.warn("getSessionUser: Token valid but user not found in DB:", token.sub);
+         console.warn("getSessionUser: Session exists but user not found in DB:", session.user.id);
          return null;
     }
 
     if (!user.active) {
-         console.warn("getSessionUser: User inactive:", user.email);
+         console.warn("getSessionUser: User account is inactive:", user.email);
          return null;
     }
 
-    // 3. Construct a session-like object or just return the user
+    // 3. Return a consistent session-like object
     return {
         user: {
             id: user.id,
