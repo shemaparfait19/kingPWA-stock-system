@@ -1,9 +1,15 @@
 // API route for expenses
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSessionUser } from '@/lib/auth-helper';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSessionUser(request);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
@@ -43,11 +49,21 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSessionUser(request);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Only owners and managers can record expenses
+    if (!['owner', 'manager'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Forbidden: Only owners and managers can record expenses' }, { status: 403 });
+    }
+
     const body = await request.json();
 
-    if (!body.category || !body.description || !body.amount || !body.userId) {
+    if (!body.category || !body.description || !body.amount) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'category, description, and amount are required' },
         { status: 400 }
       );
     }
@@ -58,7 +74,7 @@ export async function POST(request: NextRequest) {
         description: body.description,
         amount: parseFloat(body.amount),
         expenseDate: body.expenseDate ? new Date(body.expenseDate) : new Date(),
-        userId: body.userId,
+        userId: session.user.id, // Use the logged-in user's ID
         notes: body.notes || null,
       },
       include: {
@@ -70,7 +86,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(expense);
+    return NextResponse.json(expense, { status: 201 });
   } catch (error: any) {
     console.error('Error creating expense:', error);
     return NextResponse.json(
@@ -79,3 +95,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

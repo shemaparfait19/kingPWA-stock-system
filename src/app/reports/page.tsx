@@ -10,14 +10,16 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { MonthlySummary } from './components/monthly-summary';
 import { DailyReportTable } from './components/daily-report-table';
-import { Loader2, Calendar } from 'lucide-react';
+import { AddExpenseDialog } from './components/add-expense-dialog';
+import { Loader2, Calendar, PlusCircle, TrendingDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths } from 'date-fns';
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
-  
+  const [showAddExpense, setShowAddExpense] = useState(false);
+
   // Date Range State (Default to current month)
   const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
@@ -315,12 +317,50 @@ export default function ReportsPage() {
 
          <TabsContent value="expenses">
             {loading ? <div className="p-8 text-center">Loading...</div> : (
+              <div className="space-y-4">
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Card className="border-red-200 bg-red-50 dark:bg-red-950">
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-muted-foreground">Total Expenses</p>
+                      <p className="text-2xl font-bold text-red-600">
+                        {formatCurrency(data?.summary?.totalExpenses || 0)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {data?.details?.expenses?.length || 0} recorded expense(s)
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-muted-foreground">Gross Profit</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {formatCurrency((data?.summary?.totalRevenue || 0) - (data?.summary?.totalPartsCost || 0))}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Revenue minus parts cost</p>
+                    </CardContent>
+                  </Card>
+                  <Card className={`border-2 ${ (data?.summary?.netProfit || 0) >= 0 ? 'border-green-200 bg-green-50 dark:bg-green-950' : 'border-red-200 bg-red-50 dark:bg-red-950' }`}>
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-muted-foreground">Net Profit (After Expenses)</p>
+                      <p className={`text-2xl font-bold ${ (data?.summary?.netProfit || 0) >= 0 ? 'text-green-600' : 'text-red-600' }`}>
+                        {formatCurrency(data?.summary?.netProfit || 0)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Gross profit − expenses</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
                 <Card>
-                    <CardHeader><CardTitle>Expenses Report</CardTitle></CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle>Expenses List</CardTitle>
+                      <Button onClick={() => setShowAddExpense(true)} size="sm">
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Add Expense
+                      </Button>
+                    </CardHeader>
                     <CardContent>
-                        <div className="text-sm text-muted-foreground mb-4">
-                            Showing {data?.details?.expenses?.length || 0} expenses for this period.
-                        </div>
                         <div className="border rounded-md">
                          <table className="w-full text-sm">
                              <thead className="bg-muted text-left">
@@ -333,7 +373,10 @@ export default function ReportsPage() {
                                  </tr>
                              </thead>
                              <tbody>
-                                {data?.details?.expenses?.map((e: any) => (
+                                {(data?.details?.expenses?.length || 0) === 0 ? (
+                                  <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No expenses recorded for this period.</td></tr>
+                                ) : (
+                                  data?.details?.expenses?.map((e: any) => (
                                     <tr key={e.id} className="border-b hover:bg-muted/10">
                                         <td className="p-2 whitespace-nowrap">{formatDateTime(e.expenseDate)}</td>
                                         <td className="p-2"><Badge variant="outline">{e.category}</Badge></td>
@@ -344,13 +387,29 @@ export default function ReportsPage() {
                                         <td className="p-2 whitespace-nowrap">{e.user?.fullName || 'Unknown'}</td>
                                         <td className="p-2 text-right font-bold text-red-600">{formatCurrency(e.amount)}</td>
                                     </tr>
-                                ))}
+                                  ))
+                                )}
                              </tbody>
+                             {(data?.details?.expenses?.length || 0) > 0 && (
+                               <tfoot className="bg-muted/50 border-t">
+                                 <tr>
+                                   <td colSpan={4} className="p-2 font-bold text-right">Total Expenses:</td>
+                                   <td className="p-2 font-bold text-right text-red-600">{formatCurrency(data?.summary?.totalExpenses || 0)}</td>
+                                 </tr>
+                               </tfoot>
+                             )}
                          </table>
                         </div>
                     </CardContent>
                 </Card>
+              </div>
             )}
+
+            <AddExpenseDialog
+              open={showAddExpense}
+              onOpenChange={setShowAddExpense}
+              onSuccess={fetchReports}
+            />
          </TabsContent>
 
        </Tabs>
