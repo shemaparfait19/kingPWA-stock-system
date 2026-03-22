@@ -27,7 +27,8 @@
     "appointments": "Appointments",
     "sales": "Sales",
     "settings": "Settings",
-    "reports": "Reports"
+    "reports": "Reports",
+    "documents": "Documents"
   },
   "dashboard": {
     "title": "Dashboard",

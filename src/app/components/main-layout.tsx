@@ -28,6 +28,7 @@ import {
   Menu,
   Crown,
   Calendar,
+  FileText,
 } from 'lucide-react';
 import { UserNav } from './user-nav';
 import { useAuth } from './auth-provider';
@@ -49,6 +50,7 @@ const navItems = [
   { href: '/sales', label: 'sales', icon: ShoppingCart },
   { href: '/appointments', label: 'appointments', icon: Calendar },
   { href: '/reports', label: 'reports', icon: BarChart3 },
+  { href: '/documents', label: 'documents', icon: FileText },
 ];
 
 export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
