@@ -39,14 +39,15 @@ export function RepairInvoiceDialog({ open, onOpenChange, repair }: RepairInvoic
     }
 
     // Header
-    doc.setFontSize(20);
+    doc.setFontSize(16);
     doc.setTextColor(59, 130, 246);
-    doc.text('KING SERVICE TECH', 105, 45, { align: 'center' });
+    doc.text('KING SERVICE TECH LTD', 105, 38, { align: 'center' });
     
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text('Phone & Computer Repair Services', 105, 52, { align: 'center' });
-    doc.text('Phone: +250 787 649 480', 105, 57, { align: 'center' });
+    doc.text('Maintenance, Installation & Repair Services (Electronics, HVAC, IT, etc.)', 105, 44, { align: 'center' });
+    doc.text('Phone: 0787 649 480 / 0798 701 852', 105, 49, { align: 'center' });
+    doc.text('Email: kstrwanda@gmail.com  |  Website: www.kingservicetechltd.com', 105, 54, { align: 'center' });
 
     // Invoice Info
     doc.setFontSize(12);

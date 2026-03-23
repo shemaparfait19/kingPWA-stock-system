@@ -64,12 +64,14 @@ export function DeliveryNoteDialog({ open, onOpenChange }: DeliveryNoteDialogPro
     } catch {}
 
     // Header
-    doc.setFontSize(18);
+    doc.setFontSize(16);
     doc.setTextColor(59, 130, 246);
-    doc.text('KING SERVICE TECH', 105, 42, { align: 'center' });
+    doc.text('KING SERVICE TECH LTD', 105, 38, { align: 'center' });
     doc.setFontSize(9);
     doc.setTextColor(100);
-    doc.text('Phone & Computer Repair Services  |  Tel: +250 787 649 480', 105, 49, { align: 'center' });
+    doc.text('Maintenance, Installation & Repair Services (Electronics, HVAC, IT, etc.)', 105, 44, { align: 'center' });
+    doc.text('Phone: 0787 649 480 / 0798 701 852', 105, 49, { align: 'center' });
+    doc.text('Email: kstrwanda@gmail.com  |  Website: www.kingservicetechltd.com', 105, 54, { align: 'center' });
 
     // Title
     doc.setFontSize(14);

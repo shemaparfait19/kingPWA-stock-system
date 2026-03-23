@@ -198,7 +198,7 @@ export default function ReportsPage() {
                             Showing {data?.details?.repairs?.length || 0} repair jobs for this period.
                         </div>
                         {/* We could create a dedicated component, but for now reuse DailyTable logic or simple mapping */}
-                        <div className="border rounded-md">
+                        <div className="border rounded-md overflow-x-auto">
                          <table className="w-full text-sm">
                              <thead className="bg-muted text-left">
                                  <tr className="border-b">
@@ -262,7 +262,7 @@ export default function ReportsPage() {
                         <div className="text-sm text-muted-foreground mb-4">
                             Showing {data?.details?.sales?.length || 0} sales for this period.
                         </div>
-                        <div className="border rounded-md">
+                        <div className="border rounded-md overflow-x-auto">
                          <table className="w-full text-sm">
                              <thead className="bg-muted text-left">
                                  <tr className="border-b">
@@ -361,7 +361,7 @@ export default function ReportsPage() {
                       </Button>
                     </CardHeader>
                     <CardContent>
-                        <div className="border rounded-md">
+                        <div className="border rounded-md overflow-x-auto">
                          <table className="w-full text-sm">
                              <thead className="bg-muted text-left">
                                  <tr className="border-b">
