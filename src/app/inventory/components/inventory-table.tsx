@@ -107,6 +107,32 @@ export function InventoryTable({ type }: InventoryTableProps) {
             </div>
           </div>
 
+          {/* Inventory Value Summary */}
+          {items.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="bg-muted/40 rounded-lg p-3 border">
+                <p className="text-xs text-muted-foreground">Total Items</p>
+                <p className="text-xl font-bold">{items.reduce((s, i) => s + i.quantity, 0)}</p>
+                <p className="text-xs text-muted-foreground">{items.length} SKUs</p>
+              </div>
+              {showCostPrice && (
+                <div className="bg-muted/40 rounded-lg p-3 border">
+                  <p className="text-xs text-muted-foreground">Stock Value (Cost)</p>
+                  <p className="text-xl font-bold text-orange-600">{formatCurrency(items.reduce((s, i) => s + i.quantity * i.unitCost, 0))}</p>
+                </div>
+              )}
+              <div className="bg-muted/40 rounded-lg p-3 border">
+                <p className="text-xs text-muted-foreground">Retail Value</p>
+                <p className="text-xl font-bold text-green-600">{formatCurrency(items.reduce((s, i) => s + i.quantity * i.sellingPrice, 0))}</p>
+              </div>
+              <div className="bg-muted/40 rounded-lg p-3 border">
+                <p className="text-xs text-muted-foreground">Low Stock</p>
+                <p className="text-xl font-bold text-red-600">{items.filter(i => i.quantity <= i.reorderLevel).length}</p>
+                <p className="text-xs text-muted-foreground">need restocking</p>
+              </div>
+            </div>
+          )}
+
           {filteredItems.length === 0 ? (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

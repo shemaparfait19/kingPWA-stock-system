@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Camera, FileText, Package, Clock, CheckCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Camera, FileText, Package, Clock, CheckCircle, Trash2, ShoppingCart } from 'lucide-react';
 import { formatCurrency, formatDateTime, getRepairStatusColor, getPriorityColor } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/app/components/auth-provider';
@@ -30,8 +30,8 @@ export default function RepairDetailPage() {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [internalSaleLoading, setInternalSaleLoading] = useState(false);
   const canDelete = canDeleteRepairs(user?.role);
-
   const handleDelete = async () => {
     if(!confirm('Are you sure you want to delete this repair job? This action cannot be undone.')) return;
     try {
@@ -45,6 +45,30 @@ export default function RepairDetailPage() {
         }
     } catch(e) {
         toast({ title: 'Error deleting', variant: 'destructive' });
+    }
+  };
+
+  const handleInternalSale = async () => {
+    const shopParts = repair.partsUsed?.filter((p: any) => p.inventoryItem?.category?.type === 'SHOP' || p.itemId);
+    if (!shopParts?.length) {
+      toast({ title: 'No inventory parts found', description: 'Add parts from SHOP inventory first', variant: 'destructive' });
+      return;
+    }
+    if (!confirm(`This will create an internal sales invoice for ${shopParts.length} part(s) used in this repair. Continue?`)) return;
+    setInternalSaleLoading(true);
+    try {
+      const res = await fetch(`/api/repairs/${params.id}/internal-sale`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: 'Internal sale recorded!', description: `Invoice ${data.invoiceNumber} created` });
+        fetchRepair();
+      } else {
+        toast({ title: 'Failed', description: data.error, variant: 'destructive' });
+      }
+    } catch (e) {
+      toast({ title: 'Error creating internal sale', variant: 'destructive' });
+    } finally {
+      setInternalSaleLoading(false);
     }
   };
 
@@ -106,6 +130,12 @@ export default function RepairDetailPage() {
             <FileText className="h-4 w-4 mr-2" />
             Invoice
           </Button>
+          {(user?.role === 'owner' || user?.role === 'manager') && repair.partsUsed?.length > 0 && (
+            <Button variant="outline" onClick={handleInternalSale} disabled={internalSaleLoading}>
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {internalSaleLoading ? 'Recording...' : 'Record Parts Sale'}
+            </Button>
+          )}
           {(user?.role === 'owner' || user?.role === 'manager' || user?.role === 'technician') && (
              <Button variant="outline" onClick={() => setShowEditDialog(true)}>
                <Pencil className="h-4 w-4 mr-2" />
@@ -255,6 +285,13 @@ export default function RepairDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Final Cost</p>
                   <p className="font-medium text-lg">{formatCurrency(repair.actualCost)}</p>
+                </div>
+              )}
+              {repair.balance > 0 && (
+                <div className="bg-red-50 dark:bg-red-950 rounded-md p-3 border border-red-200">
+                  <p className="text-sm font-medium text-red-600">Balance Owed by Customer</p>
+                  <p className="text-2xl font-bold text-red-600">{formatCurrency(repair.balance)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Customer has not paid this amount yet</p>
                 </div>
               )}
             </CardContent>
