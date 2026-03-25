@@ -9,7 +9,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ----------------------------------------------------------------------------
+// Branches & Admin
+// ----------------------------------------------------------------------------
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  location  String?
+  phone     String?
+  isDefault Boolean  @default(false)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relations
+  users                 User[]
+  customers             Customer[]
+  inventoryItems        InventoryItem[]
+  inventoryTransactions InventoryTransaction[]
+  repairJobs            RepairJob[]
+  repairPartsUsed       RepairPartUsed[]
+  salesInvoices         SalesInvoice[]
+  appointments          Appointment[]
+  expenses              Expense[]
+  userLogs              UserLog[]
+
+  @@map("branches")
+}
+
+model AdminSettings {
+  id        String   @id @default(cuid())
+  adminPin  String   @default("00000")
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_settings")
+}
+
+model UserLog {
+  id        String   @id @default(cuid())
+  userId    String
+  branchId  String?
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user   User    @relation(fields: [userId], references: [id])
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  @@map("user_logs")
+}
+
+// ----------------------------------------------------------------------------
 // User Management
+// ----------------------------------------------------------------------------
 model User {
   id           String    @id @default(cuid())
   username     String    @unique
@@ -19,10 +71,12 @@ model User {
   fullName     String
   phone        String
   active       Boolean   @default(true)
+  branchId     String?
   createdAt    DateTime  @default(now())
   lastLogin    DateTime?
 
   // Relations
+  branch                Branch?                @relation(fields: [branchId], references: [id])
   inventoryTransactions InventoryTransaction[]
   repairJobs            RepairJob[]            @relation("AssignedRepairs")
   createdRepairs        RepairJob[]            @relation("CreatedRepairs")
@@ -33,6 +87,7 @@ model User {
   notifications         Notification[]
   pushSubscriptions     PushSubscription[]
   activityLogs          ActivityLog[]
+  userLogs              UserLog[]
 
   @@map("users")
 }
@@ -44,7 +99,9 @@ enum UserRole {
   sales
 }
 
+// ----------------------------------------------------------------------------
 // Customer Management
+// ----------------------------------------------------------------------------
 model Customer {
   id            String       @id @default(cuid())
   name          String
@@ -58,9 +115,11 @@ model Customer {
   loyaltyPoints Int          @default(0)
   notes         String?
   blacklisted   Boolean      @default(false)
+  branchId      String?
   createdAt     DateTime     @default(now())
 
   // Relations
+  branch        Branch?        @relation(fields: [branchId], references: [id])
   repairJobs    RepairJob[]
   salesInvoices SalesInvoice[]
   appointments  Appointment[]
@@ -75,7 +134,9 @@ enum CustomerType {
   corporate
 }
 
+// ----------------------------------------------------------------------------
 // Inventory Management
+// ----------------------------------------------------------------------------
 model InventoryCategory {
   id        String        @id @default(cuid())
   name      String
@@ -111,9 +172,11 @@ model InventoryItem {
   supplierId      String?
   lowStockAlert   Boolean  @default(false)
   active          Boolean  @default(true)
+  branchId        String?
   createdAt       DateTime @default(now())
 
   // Relations
+  branch       Branch?                @relation(fields: [branchId], references: [id])
   category     InventoryCategory      @relation(fields: [categoryId], references: [id])
   supplier     Supplier?              @relation(fields: [supplierId], references: [id])
   transactions InventoryTransaction[]
@@ -132,11 +195,13 @@ model InventoryTransaction {
   referenceId String?
   userId      String
   notes       String?
+  branchId    String?
   createdAt   DateTime          @default(now())
 
   // Relations
-  item InventoryItem @relation(fields: [itemId], references: [id])
-  user User          @relation(fields: [userId], references: [id])
+  branch Branch?       @relation(fields: [branchId], references: [id])
+  item   InventoryItem @relation(fields: [itemId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
 
   @@map("inventory_transactions")
 }
@@ -156,7 +221,9 @@ enum TransactionReason {
   purchase
 }
 
+// ----------------------------------------------------------------------------
 // Repair Management
+// ----------------------------------------------------------------------------
 model RepairJob {
   id                 String         @id @default(cuid())
   jobNumber          String         @unique
@@ -177,6 +244,7 @@ model RepairJob {
   assignedTo         String?
   promisedDate       DateTime
   photoUrls          String[]
+  branchId           String?
   createdAt          DateTime       @default(now())
   createdBy          String
   startedAt          DateTime?
@@ -184,6 +252,7 @@ model RepairJob {
   collectedAt        DateTime?
 
   // Relations
+  branch        Branch?          @relation(fields: [branchId], references: [id])
   customer      Customer         @relation(fields: [customerId], references: [id])
   assignedUser  User?            @relation("AssignedRepairs", fields: [assignedTo], references: [id])
   createdByUser User             @relation("CreatedRepairs", fields: [createdBy], references: [id])
@@ -215,16 +284,20 @@ model RepairPartUsed {
   quantity    Int
   unitCost    Float
   totalCost   Float
+  branchId    String?
   createdAt   DateTime @default(now())
 
   // Relations
+  branch    Branch?        @relation(fields: [branchId], references: [id])
   repairJob RepairJob      @relation(fields: [repairJobId], references: [id])
   item      InventoryItem? @relation(fields: [itemId], references: [id])
 
   @@map("repair_parts_used")
 }
 
+// ----------------------------------------------------------------------------
 // Sales Management
+// ----------------------------------------------------------------------------
 model SalesInvoice {
   id            String        @id @default(cuid())
   invoiceNumber String        @unique
@@ -238,9 +311,11 @@ model SalesInvoice {
   paymentMethod PaymentMethod
   paymentStatus PaymentStatus @default(unpaid)
   userId        String
+  branchId      String?
   createdAt     DateTime      @default(now())
 
   // Relations
+  branch   Branch?     @relation(fields: [branchId], references: [id])
   customer Customer?   @relation(fields: [customerId], references: [id])
   user     User        @relation(fields: [userId], references: [id])
   items    SalesItem[]
@@ -278,7 +353,9 @@ model SalesItem {
   @@map("sales_items")
 }
 
+// ----------------------------------------------------------------------------
 // Appointments & Scheduling
+// ----------------------------------------------------------------------------
 model Appointment {
   id              String            @id @default(cuid())
   customerId      String
@@ -290,9 +367,11 @@ model Appointment {
   assignedTo      String
   location        String?
   createdBy       String
+  branchId        String?
   createdAt       DateTime          @default(now())
 
   // Relations
+  branch       Branch?  @relation(fields: [branchId], references: [id])
   customer     Customer @relation(fields: [customerId], references: [id])
   assignedUser User     @relation("AssignedAppointments", fields: [assignedTo], references: [id])
   createdUser  User     @relation("CreatedAppointments", fields: [createdBy], references: [id])
@@ -306,7 +385,9 @@ enum AppointmentStatus {
   cancelled
 }
 
+// ----------------------------------------------------------------------------
 // Expenses
+// ----------------------------------------------------------------------------
 model Expense {
   id          String   @id @default(cuid())
   category    String
@@ -315,15 +396,19 @@ model Expense {
   expenseDate DateTime
   userId      String
   notes       String?
+  branchId    String?
   createdAt   DateTime @default(now())
 
   // Relations
-  user User @relation(fields: [userId], references: [id])
+  branch Branch? @relation(fields: [branchId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
 
   @@map("expenses")
 }
 
-// Notifications
+// ----------------------------------------------------------------------------
+// Notifications & Activity
+// ----------------------------------------------------------------------------
 model Notification {
   id        String           @id @default(cuid())
   userId    String
@@ -347,7 +432,6 @@ enum NotificationType {
   device_ready
 }
 
-// Activity Logs
 model ActivityLog {
   id        String   @id @default(cuid())
   userId    String
@@ -365,7 +449,9 @@ model ActivityLog {
   @@map("activity_logs")
 }
 
-// Suppliers
+// ----------------------------------------------------------------------------
+// Suppliers & Push
+// ----------------------------------------------------------------------------
 model Supplier {
   id            String   @id @default(cuid())
   name          String
@@ -383,7 +469,6 @@ model Supplier {
   @@map("suppliers")
 }
 
-// Push Notifications
 model PushSubscription {
   id        String   @id @default(cuid())
   userId    String

@@ -15,6 +15,9 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     const where: any = {};
+    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
+      where.branchId = session.user.branchId;
+    }
     
     if (startDate && endDate) {
       where.expenseDate = {
@@ -76,6 +79,7 @@ export async function POST(request: NextRequest) {
         expenseDate: body.expenseDate ? new Date(body.expenseDate) : new Date(),
         userId: session.user.id, // Use the logged-in user's ID
         notes: body.notes || null,
+        branchId: session.user.branchId || undefined,
       },
       include: {
         user: {

@@ -2,17 +2,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { getSessionUser } from '@/lib/auth-helper';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSessionUser(request);
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role');
 
+    const where: any = { active: true };
+    if (role) where.role = role;
+    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
+       where.branchId = session.user.branchId;
+    }
+
     const users = await prisma.user.findMany({
-      where: {
-        ...(role && { role: role as any }),
-        active: true,
-      },
+      where,
       select: {
         id: true,
         username: true,
@@ -21,6 +26,7 @@ export async function GET(request: NextRequest) {
         phone: true,
         role: true,
         active: true,
+        branchId: true,
         createdAt: true,
         lastLogin: true,
       },
@@ -42,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fullName, email, phone, role, password } = body;
+    const { fullName, email, phone, role, password, branchId } = body;
 
     if (!fullName || !email || !password || !role) {
       return NextResponse.json(
@@ -79,6 +85,7 @@ export async function POST(request: NextRequest) {
         role: role === 'admin' ? 'owner' : role, // Map admin to owner if needed, though frontend should send correct value
         passwordHash: hashedPassword,
         active: true,
+        branchId: branchId || null,
       },
       select: {
         id: true,
@@ -86,6 +93,7 @@ export async function POST(request: NextRequest) {
         email: true,
         phone: true,
         role: true,
+        branchId: true,
         createdAt: true,
       },
     });

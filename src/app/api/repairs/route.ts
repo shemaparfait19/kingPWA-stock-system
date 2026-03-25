@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { sendPushNotification } from '@/lib/push-service';
 
 import { auth } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,11 +12,18 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const assignedTo = searchParams.get('assignedTo');
 
+    const session = await getSessionUser(request);
+    const where: any = {
+      ...(status && { status: status as any }),
+      ...(assignedTo && { assignedTo }),
+    };
+
+    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
+      where.branchId = session.user.branchId;
+    }
+
     const repairs = await prisma.repairJob.findMany({
-      where: {
-        ...(status && { status: status as any }),
-        ...(assignedTo && { assignedTo }),
-      },
+      where,
       include: {
         customer: true,
         assignedUser: {
@@ -50,7 +58,7 @@ export async function POST(request: NextRequest) {
   let body: any;
   
   try {
-    const session = await auth();
+    const session = await getSessionUser(request);
     if (!session || !session.user) {
        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -166,7 +174,8 @@ export async function POST(request: NextRequest) {
         imei: imei || null,
         problemDescription,
         promisedDate: new Date(promisedDate),
-        priority: priority || 'normal',
+        priority: priority as any || 'normal',
+        branchId: session?.user?.branchId || undefined,
         estimatedCost: cost,
         actualCost: cost, // Default actual cost to estimated cost for now
         depositPaid: deposit,

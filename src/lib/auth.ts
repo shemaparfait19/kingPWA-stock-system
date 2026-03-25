@@ -43,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.fullName,
           email: user.email,
           role: user.role, // Custom field
+          branchId: user.branchId, // For multi-branch system
         };
       },
     }),

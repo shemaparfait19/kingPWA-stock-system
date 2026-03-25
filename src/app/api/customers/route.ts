@@ -11,7 +11,13 @@ export async function GET(request: NextRequest) {
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const whereClause: any = {};
+    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
+       whereClause.branchId = session.user.branchId;
+    }
+
     const customers = await prisma.customer.findMany({
+      where: whereClause,
       orderBy: {
         createdAt: 'desc',
       },
@@ -54,6 +60,7 @@ export async function POST(request: NextRequest) {
         address: address || null,
         customerType: customerType || 'walk_in',
         notes: notes || null,
+        branchId: session?.user?.branchId || undefined,
       },
     });
 

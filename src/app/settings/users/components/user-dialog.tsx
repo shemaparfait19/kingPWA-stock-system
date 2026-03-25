@@ -29,8 +29,20 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
     email: '',
     phone: '',
     role: 'technician',
+    branchId: '',
     password: '',
   });
+
+  const [branches, setBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/branches')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setBranches(data);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -39,6 +51,7 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
         email: user.email,
         phone: user.phone || '',
         role: user.role,
+        branchId: user.branchId || '',
         password: '',
       });
     } else {
@@ -47,6 +60,7 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
         email: '',
         phone: '',
         role: 'technician',
+        branchId: '',
         password: '',
       });
     }
@@ -65,6 +79,7 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
         email: formData.email,
         phone: formData.phone,
         role: formData.role,
+        branchId: formData.branchId || undefined,
       };
 
       // Only include password if it's a new user or if password is being changed
@@ -152,6 +167,24 @@ export function UserDialog({ open, onOpenChange, user, onSuccess }: UserDialogPr
                 <SelectItem value="manager">Manager</SelectItem>
                 <SelectItem value="technician">Technician</SelectItem>
                 <SelectItem value="sales">Sales</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="branchId">Branch Assignment</Label>
+            <Select
+              value={formData.branchId || "none"}
+              onValueChange={(value) => setFormData({ ...formData, branchId: value === "none" ? "" : value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a branch" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Super Admin (All Branches)</SelectItem>
+                {branches.map(b => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

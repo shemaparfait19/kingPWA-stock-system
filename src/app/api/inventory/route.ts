@@ -10,14 +10,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
 
-    // Optional: Check session if you want to restrict inventory view
-    // const session = await getSessionUser(request);
+    const session = await getSessionUser(request);
     
-    // For now keeping it consistent with original logic (no enforced check in GET, but catching errors)
+    let whereClause: any = { active: true };
+    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
+       whereClause.branchId = session.user.branchId;
+    }
+
     const items = await prisma.inventoryItem.findMany({
-      where: {
-        active: true,
-      },
+      where: whereClause,
       include: {
         category: true,
       },
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
         supplierId: body.supplierId || null,
         lowStockAlert: body.lowStockAlert || false,
         active: body.active !== undefined ? body.active : true,
+        branchId: session.user.branchId || undefined,
       },
       include: {
         category: true,

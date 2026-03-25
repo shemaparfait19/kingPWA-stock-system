@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { canManageSales } from '@/lib/permissions';
 import { auth } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +11,12 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
+    const session = await getSessionUser(request);
     const where: any = {};
+    
+    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
+      where.branchId = session.user.branchId;
+    }
     
     if (startDate && endDate) {
       where.saleDate = {
@@ -51,12 +57,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-import { getSessionUser } from '@/lib/auth-helper';
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getSessionUser(request);
     let userId: string | undefined;
+    let branchIdToSave: string | undefined = session?.user?.branchId;
 
     if (session && session.user) {
         userId = session.user.id;
@@ -69,6 +74,7 @@ export async function POST(request: NextRequest) {
         
         if (fallbackUser) {
             userId = fallbackUser.id;
+            branchIdToSave = fallbackUser.branchId || undefined;
             console.log(`Using fallback user: ${fallbackUser.username} (${fallbackUser.id})`);
         } else {
              // If absolutely no user found, we can't create a sale because userId is required.
@@ -148,6 +154,7 @@ export async function POST(request: NextRequest) {
         data: {
           invoiceNumber: `INV-${Date.now()}`,
           customerId: customerId || null,
+          branchId: branchIdToSave,
           userId: userId,
           subtotal,
           tax,

@@ -28,11 +28,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const branchFilter = session.user.role !== 'owner' && session.user.branchId 
+        ? { branchId: session.user.branchId } 
+        : {};
+
     // Unpaid / partial sales
     const unpaidSales = await prisma.salesInvoice.findMany({
       where: {
         paymentStatus: { in: ['unpaid', 'partial'] },
         ...(dateFilter.gte ? { saleDate: dateFilter } : {}),
+        ...branchFilter,
       },
       include: {
         customer: { select: { id: true, name: true, phone: true } },
@@ -47,6 +52,7 @@ export async function GET(request: NextRequest) {
       where: {
         balance: { gt: 0 },
         ...(dateFilter.gte ? { createdAt: dateFilter } : {}),
+        ...branchFilter,
       },
       include: {
         customer: { select: { id: true, name: true, phone: true } },

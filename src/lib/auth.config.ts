@@ -26,6 +26,7 @@ export const authConfig = {
       if (user) {
         token.role = (user as any).role;
         token.id = user.id;
+        token.branchId = (user as any).branchId;
       }
       
       // Update session if requested (e.g., profile update)
@@ -39,6 +40,7 @@ export const authConfig = {
       if (session.user) {
         (session.user as any).role = token.role;
         (session.user as any).id = token.id;
+        (session.user as any).branchId = token.branchId;
       }
       return session;
     },

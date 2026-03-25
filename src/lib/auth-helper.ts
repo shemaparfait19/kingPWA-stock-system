@@ -24,7 +24,8 @@ export async function getSessionUser(request?: NextRequest) {
           email: true,
           fullName: true,
           role: true,
-          active: true
+          active: true,
+          branchId: true
       }
     });
 
@@ -44,7 +45,8 @@ export async function getSessionUser(request?: NextRequest) {
             id: user.id,
             email: user.email,
             name: user.fullName,
-            role: user.role
+            role: user.role,
+            branchId: user.branchId
         }
     };
 

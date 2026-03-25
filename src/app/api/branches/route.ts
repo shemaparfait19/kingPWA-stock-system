@@ -1,7 +1,6 @@
-// API route for dashboard stats
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth-helper';
-import { getDashboardStats } from '@/lib/data-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,13 +9,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const branchIdToFilter = session.user.role !== 'owner' ? session.user.branchId : undefined;
-    const stats = await getDashboardStats(branchIdToFilter || undefined);
-    return NextResponse.json(stats);
+    const branches = await prisma.branch.findMany({
+      where: { active: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, location: true }
+    });
+
+    return NextResponse.json(branches);
   } catch (error: any) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error('Error fetching branches:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch stats' },
+      { error: error.message || 'Failed to fetch branches' },
       { status: 500 }
     );
   }

@@ -29,6 +29,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
     }
 
+    const branchFilter = session.user.role !== 'owner' && session.user.branchId 
+        ? { branchId: session.user.branchId } 
+        : {};
+
     // 1. Fetch Completed Repair Jobs (Income & Parts Cost)
     const repairs = await prisma.repairJob.findMany({
       where: {
@@ -44,7 +48,8 @@ export async function GET(request: NextRequest) {
              // Given the "RAPOLO" context, it's usually cash flow. But we lack a separate "Payments" table.
              // We will use `createdAt` for grouping for now as it's the stable "Job Date".
              { createdAt: { gte: startOfDay(startDate) } },
-             { createdAt: { lte: endOfDay(endDate) } }
+             { createdAt: { lte: endOfDay(endDate) } },
+             branchFilter
         ]
       },
       orderBy: { createdAt: 'desc' },
@@ -60,7 +65,8 @@ export async function GET(request: NextRequest) {
         saleDate: {
           gte: startOfDay(startDate),
           lte: endOfDay(endDate)
-        }
+        },
+        ...branchFilter
       },
       include: {
         user: true,
@@ -78,7 +84,8 @@ export async function GET(request: NextRequest) {
         expenseDate: {
           gte: startOfDay(startDate),
           lte: endOfDay(endDate)
-        }
+        },
+        ...branchFilter
       },
       include: {
         user: true

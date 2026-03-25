@@ -233,9 +233,11 @@ export async function createSaleInvoice(
 }
 
 // Get dashboard statistics
-export async function getDashboardStats(): Promise<any> {
+export async function getDashboardStats(branchId?: string): Promise<any> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const branchFilter = branchId ? { branchId } : {};
 
   // Today's sales
   const todaySales = await prisma.salesInvoice.aggregate({
@@ -243,6 +245,7 @@ export async function getDashboardStats(): Promise<any> {
       saleDate: {
         gte: today,
       },
+      ...branchFilter,
     },
     _sum: {
       total: true,
@@ -256,6 +259,7 @@ export async function getDashboardStats(): Promise<any> {
         gte: today,
       },
       status: 'collected',
+      ...branchFilter,
     },
     _sum: {
       actualCost: true,
@@ -265,6 +269,7 @@ export async function getDashboardStats(): Promise<any> {
   // Repair status counts
   const repairCounts = await prisma.repairJob.groupBy({
     by: ['status'],
+    where: branchFilter,
     _count: true,
   });
 
@@ -277,6 +282,7 @@ export async function getDashboardStats(): Promise<any> {
     where: {
       lowStockAlert: true,
       active: true,
+      ...branchFilter,
     },
   });
 
@@ -290,6 +296,7 @@ export async function getDashboardStats(): Promise<any> {
       promisedDate: {
         lt: now,
       },
+      ...branchFilter,
     },
   });
 
@@ -299,6 +306,7 @@ export async function getDashboardStats(): Promise<any> {
       paymentStatus: {
         in: ['unpaid', 'partial'],
       },
+      ...branchFilter,
     },
     _sum: {
       total: true,
