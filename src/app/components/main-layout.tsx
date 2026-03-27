@@ -58,6 +58,19 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const { user, loading } = useAuth();
   const [headerTitle, setHeaderTitle] = useState('King Service Tech');
+  const [branches, setBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/branches')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setBranches(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  const currentBranch = branches.find(b => b.id === user?.branchId);
+  const branchName = user?.role === 'owner' ? 'HQ (All Branches)' : (currentBranch?.name || 'Loading Branch...');
 
   // Filter nav items based on permissions
   const visibleNavItems = navItems.filter(item => {
@@ -135,6 +148,22 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
                   </Link>
                 </SidebarMenuItem>
               )}
+
+              {/* Executive Admin Dashboard — owner only */}
+              {user?.role === 'owner' && (
+                <SidebarMenuItem>
+                  <Link href="/admin-pin">
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith('/admin-dashboard') || pathname === '/admin-pin'}
+                      tooltip="Admin Dashboard"
+                      className="text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10"
+                    >
+                      <Crown className="text-yellow-500" />
+                      <span>Admin Dashboard</span>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
@@ -143,10 +172,15 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
           <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
             <SidebarTrigger />
             
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden flex items-center gap-3">
               <h1 className="text-lg font-semibold truncate">
                 {headerTitle}
               </h1>
+              {user && (
+                <span className="hidden sm:inline-flex items-center rounded-md bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-600 ring-1 ring-inset ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/20">
+                  {branchName}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <NotificationsDropdown />

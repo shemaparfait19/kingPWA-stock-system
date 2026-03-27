@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!['owner', 'manager'].includes(session.user.role)) {
+    if (!['owner', 'manager', 'sales'].includes(session.user.role)) {
       console.warn(`Access denied to Financials for user ${session.user.id} with role ${session.user.role}`);
       return NextResponse.json({ error: 'Forbidden: Access restricted to owners and managers' }, { status: 403 });
     }
@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const startDateParam = searchParams.get('startDate');
     const endDateParam = searchParams.get('endDate');
+    const branchIdParam = searchParams.get('branchId'); // owner-only branch filter
 
     // Default to current month if no dates provided
     const now = new Date();
@@ -29,9 +30,14 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
     }
 
-    const branchFilter = session.user.role !== 'owner' && session.user.branchId 
-        ? { branchId: session.user.branchId } 
-        : {};
+    let branchFilter: any = {};
+    if (session.user.role === 'owner') {
+      // Owner can optionally filter by a specific branch; if none selected, sees all
+      if (branchIdParam) branchFilter = { branchId: branchIdParam };
+    } else if (session.user.branchId) {
+      // Non-owners are always locked to their branch
+      branchFilter = { branchId: session.user.branchId };
+    }
 
     // 1. Fetch Completed Repair Jobs (Income & Parts Cost)
     const repairs = await prisma.repairJob.findMany({

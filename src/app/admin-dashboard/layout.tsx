@@ -1,20 +1,29 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { LayoutDashboard, Users, Activity, Settings, LogOut, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, Settings, LogOut, ShieldAlert, BarChart3 } from 'lucide-react';
 import { getSessionUser } from '@/lib/auth-helper';
+import { auth } from '@/lib/auth';
 
 export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const rawAuth = await auth();
   const session = await getSessionUser();
-  if (!session || !session.user || session.user.role !== 'owner') {
+  console.log('AdminDashboardLayout - rawAuth:', JSON.stringify(rawAuth, null, 2));
+  console.log('AdminDashboardLayout - getSessionUser:', JSON.stringify(session, null, 2));
+
+  if (!session || !session.user) {
     redirect('/login');
   }
 
-  const cookieStore = cookies();
+  if (session.user.role !== 'owner') {
+    redirect('/dashboard');
+  }
+
+  const cookieStore = await cookies();
   const unlocked = cookieStore.get('admin_unlocked')?.value;
 
   if (unlocked !== 'true') {
@@ -38,6 +47,10 @@ export default async function AdminDashboardLayout({
           <Link href="/admin-dashboard/activity" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors">
             <Activity className="h-4 w-4" />
             Activity Logs
+          </Link>
+          <Link href="/admin-dashboard/reports" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors">
+            <BarChart3 className="h-4 w-4" />
+            Branch Reports
           </Link>
           <Link href="/admin-dashboard/users" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors">
             <Users className="h-4 w-4" />

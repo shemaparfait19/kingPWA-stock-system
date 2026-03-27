@@ -5,6 +5,7 @@ import { sendPushNotification } from '@/lib/push-service';
 
 import { auth } from '@/lib/auth';
 import { getSessionUser } from '@/lib/auth-helper';
+import { logUserAction } from '@/lib/log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -224,6 +225,8 @@ export async function POST(request: NextRequest) {
         // Don't fail the whole request if notification fails
       }
     }
+
+    await logUserAction('Created Repair', `Job ${jobNumber} - ${brand} ${deviceType}`, session);
 
     return NextResponse.json(repair);
   } catch (error: any) {

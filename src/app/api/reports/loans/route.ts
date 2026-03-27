@@ -9,13 +9,14 @@ export async function GET(request: NextRequest) {
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (!['owner', 'manager'].includes(session.user.role)) {
+    if (!['owner', 'manager', 'sales'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { searchParams } = request.nextUrl;
     const startDateParam = searchParams.get('startDate');
     const endDateParam = searchParams.get('endDate');
+    const branchIdParam = searchParams.get('branchId');
 
     // Date filter (optional)
     const dateFilter: any = {};
@@ -28,9 +29,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const branchFilter = session.user.role !== 'owner' && session.user.branchId 
-        ? { branchId: session.user.branchId } 
-        : {};
+    let branchFilter: any = {};
+    if (session.user.role === 'owner') {
+      if (branchIdParam) branchFilter = { branchId: branchIdParam };
+    } else if (session.user.branchId) {
+      branchFilter = { branchId: session.user.branchId };
+    }
 
     // Unpaid / partial sales
     const unpaidSales = await prisma.salesInvoice.findMany({

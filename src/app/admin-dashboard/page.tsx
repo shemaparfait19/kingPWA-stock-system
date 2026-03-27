@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { ArrowUpRight, ArrowDownRight, Activity, DollarSign, Package, Users, MapPin } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Activity, DollarSign, Package, Users, MapPin, AlertTriangle, CreditCard } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,12 +32,31 @@ export default async function AdminOverviewPage() {
 
   // Recent Global Activity
   const recentLogs = await prisma.userLog.findMany({
-    take: 10,
+    take: 25,
     orderBy: { createdAt: 'desc' },
     include: {
       user: { select: { fullName: true } },
       branch: { select: { name: true } }
     }
+  });
+
+  // Calculate Global Debt (Loans/Unpaid)
+  const unpaidSales = await prisma.salesInvoice.aggregate({
+    where: { paymentStatus: { in: ['unpaid', 'partial'] } },
+    _sum: { total: true, paidAmount: true },
+    _count: true
+  });
+  const unpaidRepairs = await prisma.repairJob.aggregate({
+    where: { balance: { gt: 0 } },
+    _sum: { balance: true },
+    _count: true
+  });
+  
+  const globalDebtTotal = (unpaidSales._sum.total || 0) - (unpaidSales._sum.paidAmount || 0) + (unpaidRepairs._sum.balance || 0);
+
+  // Global Low Stock Alerts
+  const globalLowStock = await prisma.inventoryItem.count({
+    where: { active: true, lowStockAlert: true } // Assuming lowStockAlert gets toggled via background or frontend
   });
 
   // Branch Revenue Comparison (Current Month)
@@ -72,7 +91,7 @@ export default async function AdminOverviewPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
       {/* Top Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 shadow-lg backdrop-blur-sm relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full transition-transform group-hover:scale-110" />
           <div className="flex items-center justify-between mb-4">
@@ -132,6 +151,36 @@ export default async function AdminOverviewPage() {
             <span>Across all locations</span>
           </div>
         </div>
+
+        {/* Global Outstanding Debt */}
+        <div className="bg-slate-900/60 border border-rose-900/40 rounded-xl p-5 shadow-lg backdrop-blur-sm relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-bl-full transition-transform group-hover:scale-110" />
+           <div className="flex items-center justify-between mb-4">
+             <h3 className="text-slate-400 text-sm font-medium">Global System Debt</h3>
+             <div className="h-8 w-8 bg-rose-500/20 text-rose-400 rounded-lg flex items-center justify-center">
+               <CreditCard className="h-4 w-4" />
+             </div>
+           </div>
+           <p className="text-3xl font-bold tracking-tight text-white">{formatCurrency(globalDebtTotal)}</p>
+           <div className="flex items-center mt-2 text-xs text-rose-400 font-medium">
+             <span>Across {unpaidSales._count + unpaidRepairs._count} open invoices</span>
+           </div>
+        </div>
+
+        {/* Global Low Stock Warnings */}
+        <div className="bg-slate-900/60 border border-amber-900/40 rounded-xl p-5 shadow-lg backdrop-blur-sm relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-bl-full transition-transform group-hover:scale-110" />
+           <div className="flex items-center justify-between mb-4">
+             <h3 className="text-slate-400 text-sm font-medium">Global Low Stock</h3>
+             <div className="h-8 w-8 bg-amber-500/20 text-amber-400 rounded-lg flex items-center justify-center">
+               <AlertTriangle className="h-4 w-4" />
+             </div>
+           </div>
+           <p className="text-3xl font-bold tracking-tight text-white">{globalLowStock}</p>
+           <div className="flex items-center mt-2 text-xs text-amber-400 font-medium">
+             <span>Items dangerously low everywhere</span>
+           </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -179,7 +228,7 @@ export default async function AdminOverviewPage() {
             <Activity className="h-5 w-5 mr-2 text-indigo-400" />
             Global Activity Feed
           </h2>
-          <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[400px]">
+          <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[600px]">
             {recentLogs.map((log) => (
               <div key={log.id} className="relative pl-6 border-l-2 border-slate-800 last:border-transparent pb-4 last:pb-0">
                 <span className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-blue-500 ring-4 ring-slate-900"></span>

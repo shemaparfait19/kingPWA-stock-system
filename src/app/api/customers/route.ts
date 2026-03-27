@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 import { getSessionUser } from '@/lib/auth-helper';
+import { logUserAction } from '@/lib/log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,6 +64,8 @@ export async function POST(request: NextRequest) {
         branchId: session?.user?.branchId || undefined,
       },
     });
+
+    await logUserAction('Added Customer', `Name: ${name}`, session);
 
     return NextResponse.json(customer);
   } catch (error: any) {

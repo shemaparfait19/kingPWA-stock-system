@@ -57,6 +57,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     // They generally don't need to see cost prices or delete things.
   ],
   sales: [
+    'view_reports',
     'manage_sales',
     // Sales staff operate POS.
     // They shouldn't delete sales history or inventory.

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { canManageSales } from '@/lib/permissions';
 import { auth } from '@/lib/auth';
 import { getSessionUser } from '@/lib/auth-helper';
+import { logUserAction } from '@/lib/log-helper';
 
 export async function GET(request: NextRequest) {
   try {
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSessionUser(request);
     let userId: string | undefined;
-    let branchIdToSave: string | undefined = session?.user?.branchId;
+    let branchIdToSave: string | undefined = session?.user?.branchId || undefined;
 
     if (session && session.user) {
         userId = session.user.id;
