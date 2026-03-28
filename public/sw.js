@@ -6,11 +6,6 @@ const API_CACHE = 'api-v1';
 // Static assets to cache
 const STATIC_ASSETS = [
   '/',
-  '/dashboard',
-  '/repairs',
-  '/inventory',
-  '/customers',
-  '/sales',
   '/offline.html',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
