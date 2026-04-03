@@ -60,6 +60,11 @@ export const MainLayout: FC<{ children: ReactNode }> = ({ children }) => {
   const [headerTitle, setHeaderTitle] = useState('King Service Tech');
   const [branches, setBranches] = useState<any[]>([]);
 
+  // On the login page, render NO navigation — just a plain full-screen container
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
   useEffect(() => {
     fetch('/api/branches')
       .then(res => res.json())

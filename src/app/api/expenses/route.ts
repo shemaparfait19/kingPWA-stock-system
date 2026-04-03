@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only owners and managers can record expenses
-    if (!['owner', 'manager'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'Forbidden: Only owners and managers can record expenses' }, { status: 403 });
+    // Owners, managers, and sales staff can record expenses
+    if (!['owner', 'manager', 'sales'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Forbidden: Only owners, managers, and sales staff can record expenses' }, { status: 403 });
     }
 
     const body = await request.json();
