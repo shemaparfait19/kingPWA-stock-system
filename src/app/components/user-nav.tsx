@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, LogIn } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { useRouter } from 'next/navigation';
 
@@ -17,7 +17,20 @@ export function UserNav() {
   const { user, signOut } = useAuth();
   const router = useRouter();
 
-  if (!user) return null;
+  // Fallback: session expired or user context not yet loaded
+  if (!user) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2 text-destructive border-destructive/50 hover:bg-destructive/10"
+        onClick={() => router.push('/login')}
+      >
+        <LogIn className="h-4 w-4" />
+        <span className="hidden sm:inline">Sign In</span>
+      </Button>
+    );
+  }
 
   const initials = user.fullName
     .split(' ')

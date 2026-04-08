@@ -1,10 +1,9 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut as nextAuthSignOut } from 'next-auth/react';
 import type { User } from '@/lib/types';
-import { signOutUser, setCurrentUser, getUserByEmail } from '@/lib/auth-service';
 
 interface AuthContextType {
   user: User | null;
@@ -30,61 +29,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const handleClearSession = useCallback(() => {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userData');
+    setUser(null);
+  }, []);
+
   useEffect(() => {
-    // Check for user session in localStorage
     const checkSession = async () => {
       try {
-        // Try to get full user data from localStorage first
+        // 1. Hydrate from localStorage immediately for a fast UI
         const storedUserData = localStorage.getItem('userData');
-        const userEmail = localStorage.getItem('userEmail');
-        
         if (storedUserData) {
-          // Use stored user data immediately for faster load
-          const userData = JSON.parse(storedUserData);
-          setUser(userData);
-          setCurrentUser(userData);
-          setLoading(false);
-          
-          // Optionally verify in background
-          if (userEmail) {
-            getUserByEmail(userEmail).then(freshData => {
-              if (freshData && freshData.active) {
-                setUser(freshData);
-                setCurrentUser(freshData);
-                localStorage.setItem('userData', JSON.stringify(freshData));
-              } else {
-                handleClearSession();
-              }
-            }).catch(() => {
-              // Keep using cached data if verification fails
-            });
+          try {
+            const cached = JSON.parse(storedUserData);
+            setUser(cached);
+          } catch {
+            localStorage.removeItem('userData');
           }
-        } else if (userEmail) {
-          // Fallback to email-based lookup
-          const userData = await getUserByEmail(userEmail);
-          if (userData && userData.active) {
-            setUser(userData);
-            setCurrentUser(userData);
-            localStorage.setItem('userData', JSON.stringify(userData));
-          } else {
-            handleClearSession();
-          }
-          setLoading(false);
+        }
+
+        // 2. ALWAYS verify with the server — this is the source of truth.
+        //    It checks the real NextAuth JWT cookie against the DB.
+        const res = await fetch('/api/auth/me');
+
+        if (res.ok) {
+          const { user: freshUser } = await res.json();
+          // Merge server fields (id, role, branchId) with any extra local fields.
+          // Also patch localStorage so the cache stays fresh.
+          setUser((prev) => {
+            const merged = { ...(prev || {}), ...freshUser };
+            localStorage.setItem('userData', JSON.stringify(merged));
+            if (freshUser.email) localStorage.setItem('userEmail', freshUser.email);
+            return merged as User;
+          });
         } else {
-          setLoading(false);
+          // Session is invalid (cookie expired, user deactivated, etc.)
+          handleClearSession();
         }
       } catch (error) {
         console.error('Session check error:', error);
-        handleClearSession();
+        // Network error — fall back to cache so the app still works offline-ish.
+        // We do NOT clear localStorage on network failure.
+      } finally {
         setLoading(false);
       }
     };
 
     checkSession();
-  }, []);
+  }, [handleClearSession]);
 
+  // Redirect logic — runs whenever user/loading/pathname change
   useEffect(() => {
-    // Redirect logic
     if (!loading) {
       if (!user && pathname !== '/login') {
         router.push('/login');
@@ -94,33 +90,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, loading, pathname, router]);
 
-  const handleClearSession = () => {
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userData');
-    setUser(null);
-    setCurrentUser(null);
-  };
-
-  const handleSetUser = (newUser: User | null) => {
+  const handleSetUser = useCallback((newUser: User | null) => {
     setUser(newUser);
-    setCurrentUser(newUser);
     if (newUser) {
       localStorage.setItem('userEmail', newUser.email);
       localStorage.setItem('userData', JSON.stringify(newUser));
     } else {
       handleClearSession();
     }
-  };
+  }, [handleClearSession]);
 
-  const handleSignOut = async () => {
-    // Clear NextAuth Session (Cookies)
+  const handleSignOut = useCallback(async () => {
+    // Clear NextAuth session cookie
     await nextAuthSignOut({ redirect: false });
-    
-    // Clear Local State
-    await signOutUser();
-    handleSetUser(null);
+    // Clear local state & storage
+    handleClearSession();
     router.push('/login');
-  };
+  }, [handleClearSession, router]);
 
   return (
     <AuthContext.Provider value={{ user, loading, signOut: handleSignOut, setUser: handleSetUser }}>
