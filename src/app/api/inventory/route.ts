@@ -13,8 +13,17 @@ export async function GET(request: NextRequest) {
     const session = await getSessionUser(request);
     
     let whereClause: any = { active: true };
-    if (session?.user?.role !== 'owner' && session?.user?.branchId) {
-       whereClause.branchId = session.user.branchId;
+
+    if (session?.user?.role === 'owner') {
+      // Owner: optionally filter by a specific branch via ?branchId=
+      const branchIdParam = searchParams.get('branchId');
+      if (branchIdParam && branchIdParam !== 'all') {
+        whereClause.branchId = branchIdParam;
+      }
+      // If no branchId param (or 'all'), owner sees everything — no filter applied.
+    } else if (session?.user?.branchId) {
+      // Non-owner: always scoped to their own branch
+      whereClause.branchId = session.user.branchId;
     }
 
     const items = await prisma.inventoryItem.findMany({

@@ -24,9 +24,10 @@ import { useTranslations } from 'next-intl';
 
 interface InventoryTableProps {
   type: InventoryType;
+  branchId?: string; // 'all' or a specific branch ID (owner only)
 }
 
-export function InventoryTable({ type }: InventoryTableProps) {
+export function InventoryTable({ type, branchId }: InventoryTableProps) {
   const t = useTranslations('inventory');
   const tCommon = useTranslations('common');
   const [items, setItems] = useState<any[]>([]);
@@ -47,11 +48,17 @@ export function InventoryTable({ type }: InventoryTableProps) {
     // Refresh every 30 seconds
     const interval = setInterval(fetchItems, 30000);
     return () => clearInterval(interval);
-  }, [type]);
+  }, [type, branchId]);
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('/api/inventory');
+      // Build URL — include branchId param for owner branch filtering
+      const params = new URLSearchParams();
+      if (branchId && branchId !== 'all') {
+        params.set('branchId', branchId);
+      }
+      const url = `/api/inventory${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url);
       const data = await response.json();
       // Filter by category type
       const filtered = data.filter((item: any) => 
